@@ -1,41 +1,145 @@
 const router = require('express').Router();
-const User = require('../models/user.model');
+// const { authMiddleware } = require('../middlewares/auth');
 
-// GET all users
-router.get('/', async (_req, res) => {
-  const users = await User.find().sort('name');
-  res.json(users);
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     tags: [Users]
+ *     summary: List users
+ *     parameters:
+ *       - $ref: '#/components/parameters/PageParam'
+ *       - $ref: '#/components/parameters/LimitParam'
+ *       - $ref: '#/components/parameters/SearchParam'
+ *       - $ref: '#/components/parameters/SortParam'
+ *     responses:
+ *       200:
+ *         description: List users (paginated)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 meta:
+ *                   $ref: '#/components/schemas/Meta'
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *
+ *   post:
+ *     tags: [Users]
+ *     summary: Create user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserCreate'
+ *     responses:
+ *       201:
+ *         description: Created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       409:
+ *         description: Email already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get user by id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: User
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Not found
+ *
+ *   patch:
+ *     tags: [Users]
+ *     summary: Update user
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserUpdate'
+ *     responses:
+ *       200:
+ *         description: Updated user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized
+ *
+ *   delete:
+ *     tags: [Users]
+ *     summary: Delete user
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       204:
+ *         description: No Content
+ *       404:
+ *         description: Not found
+ */
+
+// ====== ตัวอย่างโค้ดรูทจริง (ย่อ) ======
+router.get('/', async (req, res) => {
+  // ... ดึง users + meta
+  res.json({ meta: { page: 1, limit: 10, total: 1, pages: 1 }, data: [] });
 });
 
-// GET one user
-router.get('/:id', async (req, res) => {
-  const user = await User.findById(req.params.id);
-  if (!user) return res.status(404).json({ message: 'User not found' });
-  res.json(user);
-});
-
-// CREATE user
 router.post('/', async (req, res) => {
-  try {
-    const user = await User.create(req.body);
-    res.status(201).json(user);
-  } catch (e) {
-    res.status(400).json({ message: e.message });
-  }
+  // ... สร้าง user
+  res.status(201).json({ id: 'u_123', name: 'Alice', email: 'alice@example.com' });
 });
 
-// UPDATE user
-router.put('/:id', async (req, res) => {
-  const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-  if (!user) return res.status(404).json({ message: 'User not found' });
-  res.json(user);
+router.get('/:id', async (req, res) => {
+  // ... อ่าน user ตาม id
+  res.json({ id: req.params.id, name: 'Alice', email: 'alice@example.com' });
 });
 
-// DELETE user
-router.delete('/:id', async (req, res) => {
-  const user = await User.findByIdAndDelete(req.params.id);
-  if (!user) return res.status(404).json({ message: 'User not found' });
-  res.status(204).end();
+router.patch('/:id', /*authMiddleware,*/ async (req, res) => {
+  // ... อัปเดต user
+  res.json({ id: req.params.id, name: 'Alice Updated', email: 'alice@example.com' });
+});
+
+router.delete('/:id', /*authMiddleware,*/ async (req, res) => {
+  // ... ลบ user
+  res.status(204).send();
 });
 
 module.exports = router;
+
