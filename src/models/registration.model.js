@@ -1,13 +1,27 @@
-const { Schema, model } = require('mongoose');
+// src/models/registration.model.js
+const pool = require('../db');
 
-const registrationSchema = new Schema({
-  user:  { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  event: { type: Schema.Types.ObjectId, ref: 'Event', required: true },
-  status: { type: String, enum: ['registered','interested','checked_in'], default: 'registered' },
-  registeredAt: { type: Date, default: Date.now }
-}, { timestamps: true });
+exports.findAll = async () => {
+  const { rows } = await pool.query(
+    `SELECT r.*, u.name AS user_name, e.title AS event_title
+     FROM registrations r
+     JOIN users u ON r.user_id=u.id
+     JOIN events e ON r.event_id=e.id
+     ORDER BY r.id DESC`
+  );
+  return rows;
+};
 
-// ป้องกันสมัครซ้ำ
-registrationSchema.index({ user: 1, event: 1 }, { unique: true });
+exports.create = async ({ user_id, event_id }) => {
+  const { rows } = await pool.query(
+    `INSERT INTO registrations (user_id, event_id)
+     VALUES ($1,$2) RETURNING *`,
+    [user_id, event_id]
+  );
+  return rows[0];
+};
 
-module.exports = model('Registration', registrationSchema);
+exports.remove = async (id) => {
+  await pool.query('DELETE FROM registrations WHERE id=$1', [id]);
+  return { ok: true };
+};

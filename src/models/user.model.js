@@ -1,9 +1,39 @@
-const { Schema, model } = require('mongoose');
+// src/models/user.model.js
+const pool = require('../db');
 
-const userSchema = new Schema({
-  name: { type: String, required: true, trim: true },
-  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  role: { type: String, enum: ['student', 'admin'], default: 'student' }
-}, { timestamps: true });
+exports.findAll = async () => {
+  const { rows } = await pool.query('SELECT * FROM users ORDER BY id ASC');
+  return rows;
+};
 
-module.exports = model('User', userSchema);
+exports.findById = async (id) => {
+  const { rows } = await pool.query('SELECT * FROM users WHERE id=$1', [id]);
+  return rows[0];
+};
+
+exports.create = async ({ name, email, password, role = 'student' }) => {
+  const { rows } = await pool.query(
+    `INSERT INTO users (name, email, password, role)
+     VALUES ($1,$2,$3,$4) RETURNING *`,
+    [name, email, password, role]
+  );
+  return rows[0];
+};
+
+exports.update = async (id, { name, email, password, role }) => {
+  const { rows } = await pool.query(
+    `UPDATE users SET
+       name=COALESCE($1,name),
+       email=COALESCE($2,email),
+       password=COALESCE($3,password),
+       role=COALESCE($4,role)
+     WHERE id=$5 RETURNING *`,
+    [name, email, password, role, id]
+  );
+  return rows[0];
+};
+
+exports.remove = async (id) => {
+  await pool.query('DELETE FROM users WHERE id=$1', [id]);
+  return { ok: true };
+};

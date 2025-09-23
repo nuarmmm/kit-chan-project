@@ -2,4 +2,5 @@
 
 note
 mongodb_username=kitchan_admin
-mongodb_password=kitchan2004
+AWS_RDS_master_password=kitchan2004
+
