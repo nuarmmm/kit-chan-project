@@ -1,0 +1,59 @@
+<%- include('layout', { body: (function(){ %>
+
+<section class="grid md:grid-cols-[1fr,420px] gap-8 items-center mt-10">
+  <div>
+    <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+      กิจกรรม<br/>คณะ IT
+    </h1>
+    <p class="mt-4 text-slate-600">
+      เว็บไซต์พาคุณมารู้จักกับกิจกรรมทุกโมเมนต์ของคณะเทคโนโลยีสารสนเทศที่นักศึกษาทุกคนจะได้เข้าร่วม
+    </p>
+    <div class="mt-6 flex gap-3">
+      <a href="#explore" class="px-5 py-2 rounded-full bg-indigo-600 text-white shadow hover:bg-indigo-700">เข้าชมเลย</a>
+      <a href="#" class="px-5 py-2 rounded-full bg-white border hover:bg-slate-50">ลงทะเบียน</a>
+    </div>
+  </div>
+  <div class="relative">
+    <!-- ใช้รูปไอคอนแทน 3D ใน mockup -->
+    <div class="aspect-[4/3] rounded-3xl bg-indigo-100 grid place-content-center">
+      <div class="text-6xl">🖼️</div>
+    </div>
+  </div>
+</section>
+
+<section class="mt-12">
+  <div class="flex flex-wrap gap-3 text-sm">
+    <% categories.forEach(c => { %>
+      <a href="/?cat=<%= encodeURIComponent(c) %>" class="px-4 py-2 rounded-full border <%= cat===c?'bg-slate-900 text-white':'bg-white' %>"><%= c %></a>
+    <% }) %>
+  </div>
+
+  <form class="mt-4" method="get" action="/">
+    <% if (cat) { %><input type="hidden" name="cat" value="<%= cat %>"/><% } %>
+    <div class="relative">
+      <input name="q" value="<%= q %>" placeholder="ค้นหากิจกรรม..." class="w-full bg-white rounded-full px-4 py-3 pr-10 border outline-none focus:ring-2 focus:ring-indigo-300">
+      <button class="absolute right-3 top-1/2 -translate-y-1/2">🔎</button>
+    </div>
+  </form>
+</section>
+
+<section id="explore" class="mt-10">
+  <h2 class="text-sm font-bold text-slate-500">กิจกรรมล่าสุด</h2>
+  <div class="mt-4 grid sm:grid-cols-2 gap-6">
+    <% if (!events.length) { %>
+      <p class="text-slate-500">ไม่พบกิจกรรม</p>
+    <% } %>
+    <% events.forEach(ev => { %>
+      <article class="bg-white rounded-2xl overflow-hidden shadow-sm border">
+        <img src="<%= ev.coverUrl %>" alt="<%= ev.title %>" class="w-full h-44 object-cover">
+        <div class="p-4">
+          <div class="text-xs text-slate-500"><%= ev.code %> • <%= ev.category %></div>
+          <h3 class="font-semibold mt-1"><%= ev.title %></h3>
+          <div class="text-xs mt-1 text-slate-600"><%= ev.date %> • <%= ev.location %></div>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<% return '' })() }) %>
