@@ -1,0 +1,41 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: powderblue;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+}
+
+.wrapper {
+    width:min(560px,92vw);
+      padding: 38px 34px 30px;
+      border-radius: 26px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.40), rgba(255,255,255,.22));
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.28);
+      box-shadow: 0 10px 40px rgba(0,0,0,.22);
+}
+
+.wrapper h1 {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.wrapper-form {
+    font-size:  20px;
+}
+
+.wrapper from input[type="submit"] {
+    font-size: 20px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}

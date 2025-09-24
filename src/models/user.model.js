@@ -37,3 +37,9 @@ exports.remove = async (id) => {
   await pool.query('DELETE FROM users WHERE id=$1', [id]);
   return { ok: true };
 };
+
+exports.findByEmail = async (email) => {
+  const { rows } = await pool.query("SELECT * FROM users WHERE email=$1", [email]);
+  return rows[0];
+};
+
