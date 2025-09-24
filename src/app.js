@@ -27,27 +27,9 @@ app.use('/api/registrations', require('./routes/registration.routes'));
 setupSwagger(app);
 
 // ----- หน้าเว็บ (SSR) -----
-app.get('/', async (req, res, next) => {
-  try {
-    const { rows } = await pool.query(`
-      SELECT id, title, description, event_date, location, capacity, image_url, created_at
-      FROM events
-      ORDER BY created_at DESC
-      LIMIT 12
-    `);
-    res.render('index', {
-      title: 'กิจกรรมคณะ IT',
-      activities: rows,
-      categories: ['วิชาการ','กีฬาและนันทนาการ','บำเพ็ญประโยชน์','ส่งเสริมศิลปวัฒนธรรม'],
-      logoText: 'กิจกรรมคณะ IT',
-      navLinks: [                                     // เพิ่ม
-    { href: '/', label: 'หน้าแรก' },
-    { href: '#', label: 'โมดูลส์' },
-    { href: '/api/events', label: 'กิจกรรมทั้งหมด (JSON)' }
-  ]
-    });
-  } catch (err) { next(err); }
-});
+app.get("/", (req, res) =>{
+  res.render("index")
+})
 
 // ----- Error handler -----
 app.use((err, req, res, next) => {
