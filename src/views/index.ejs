@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title || 'กิจกรรมคณะ IT' %></title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="navbar">
+    <div class="logo"><%= logoText || 'รอ logo ก่อน' %></div>
+    <nav>
+      <% const links = navLinks || [
+        { href: '#', label: 'หน้าแรก' },
+        { href: '#', label: 'โมดูลส์' },
+        { href: '#', label: 'กิจกรรมทั้งหมด' },
+      ]; %>
+      <% links.forEach(l => { %>
+        <a href="<%= l.href %>"><%= l.label %></a>
+      <% }) %>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <% const hero = heroData || {
+    titleTop: 'กิจกรรม',
+    titleBottom: 'คณะ IT',
+    desc: 'เว็บไซต์ที่จะพาคุณมารู้จักกับกิจกรรมทั้งหมดของคณะเทคโนโลยีสารสนเทศที่นักศึกษาทุกคนได้เข้าร่วม',
+    img: 'https://image-activity.s3.us-east-1.amazonaws.com/icon/image.png',
+    primaryBtn: { text: 'เข้าร่วม', href: '#' },
+    secondaryBtn: { text: 'รายละเอียด', href: '#' },
+  }; %>
+
+  <section class="hero">
+    <div class="hero-text">
+      <h1><%= hero.titleTop %><br><%= hero.titleBottom %></h1>
+      <p><%= hero.desc %></p>
+      <div class="hero-btns">
+        <a class="btn primary" href="<%= hero.primaryBtn.href %>"><%= hero.primaryBtn.text %></a>
+        <a class="btn secondary" href="<%= hero.secondaryBtn.href %>"><%= hero.secondaryBtn.text %></a>
+      </div>
+    </div>
+    <div class="hero-img">
+      <img src="<%= hero.img %>" alt="กิจกรรม"/>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="categories">
+    <% (categories || ['วิชาการ','กีฬาและนันทนาการ','บำเพ็ญประโยชน์','ส่งเสริมศิลปวัฒนธรรม']).forEach(c => { %>
+      <a href="#"><%= c %></a>
+    <% }) %>
+  </section>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <input type="text" placeholder="<%= searchPlaceholder || 'ค้นหากิจกรรม...' %>">
+  </div>
+
+  <!-- Activity Section -->
+  <section class="activities">
+    <h2><%= activitiesTitle || 'กิจกรรมทั้งหมด' %></h2>
+    <div class="grid">
+      <% const items = activities || [
+        { img: 'https://image-activity.s3.us-east-1.amazonaws.com/ITcamp/itc1.jpeg', name: 'ITCamp21' },
+        { img: 'https://image-activity.s3.us-east-1.amazonaws.com/TobeIT/tb1.jpg', name: 'TobeIT66' },
+        { img: 'https://image-activity.s3.us-east-1.amazonaws.com/Unite/u1.jpg', name: 'UniteCamp7' },
+        { img: 'https://image-activity.s3.us-east-1.amazonaws.com/IT3K/3k1.jpg', name: 'IT3K' },
+      ]; %>
+
+      <% items.forEach(a => { %>
+        <div class="card">
+          <img src="<%= a.img %>" alt=""/>
+          <p><%= a.name %></p>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+
+</body>
+</html>
