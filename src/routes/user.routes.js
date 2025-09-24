@@ -1,5 +1,6 @@
+// src/routes/user.routes.js
 const router = require('express').Router();
-// const { authMiddleware } = require('../middlewares/auth');
+const Users = require('../models/user.model');
 
 /**
  * @swagger
@@ -7,49 +8,22 @@ const router = require('express').Router();
  *   get:
  *     tags: [Users]
  *     summary: List users
- *     parameters:
- *       - $ref: '#/components/parameters/PageParam'
- *       - $ref: '#/components/parameters/LimitParam'
- *       - $ref: '#/components/parameters/SearchParam'
- *       - $ref: '#/components/parameters/SortParam'
- *     responses:
- *       200:
- *         description: List users (paginated)
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 meta:
- *                   $ref: '#/components/schemas/Meta'
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/User'
- *
+ *     responses: { 200: { description: "OK" } }
  *   post:
  *     tags: [Users]
- *     summary: Create user
+ *     summary: Create user (register)
  *     requestBody:
  *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/UserCreate'
- *     responses:
- *       201:
- *         description: Created
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       409:
- *         description: Email already exists
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *       content: { application/json: { schema: { $ref: '#/components/schemas/UserCreate' } } }
+ *     responses: { 201: { description: "Created" } }
  */
+router.get('/', async (_req, res, next) => {
+  try { res.json(await Users.findAll()); } catch (e) { next(e); }
+});
+
+router.post('/', async (req, res, next) => {
+  try { res.status(201).json(await Users.create(req.body)); } catch (e) { next(e); }
+});
 
 /**
  * @swagger
@@ -57,89 +31,36 @@ const router = require('express').Router();
  *   get:
  *     tags: [Users]
  *     summary: Get user by id
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema: { type: string }
- *     responses:
- *       200:
- *         description: User
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       404:
- *         description: Not found
- *
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: integer }}]
+ *     responses: { 200: { description: "OK" }, 404: { description: "Not found" } }
  *   patch:
  *     tags: [Users]
  *     summary: Update user
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema: { type: string }
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: integer }}]
  *     requestBody:
  *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/UserUpdate'
- *     responses:
- *       200:
- *         description: Updated user
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       401:
- *         description: Unauthorized
- *
+ *       content: { application/json: { schema: { $ref: '#/components/schemas/UserUpdate' } } }
+ *     responses: { 200: { description: "Updated" } }
  *   delete:
  *     tags: [Users]
  *     summary: Delete user
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema: { type: string }
- *     responses:
- *       204:
- *         description: No Content
- *       404:
- *         description: Not found
+ *     parameters: [{ name: id, in: path, required: true, schema: { type: integer }}]
+ *     responses: { 204: { description: "No Content" } }
  */
-
-// ====== ตัวอย่างโค้ดรูทจริง (ย่อ) ======
-router.get('/', async (req, res) => {
-  // ... ดึง users + meta
-  res.json({ meta: { page: 1, limit: 10, total: 1, pages: 1 }, data: [] });
+router.get('/:id', async (req, res, next) => {
+  try {
+    const row = await Users.findById(+req.params.id);
+    if (!row) return res.status(404).json({ message: 'Not found' });
+    res.json(row);
+  } catch (e) { next(e); }
 });
 
-router.post('/', async (req, res) => {
-  // ... สร้าง user
-  res.status(201).json({ id: 'u_123', name: 'Alice', email: 'alice@example.com' });
+router.patch('/:id', async (req, res, next) => {
+  try { res.json(await Users.update(+req.params.id, req.body)); } catch (e) { next(e); }
 });
 
-router.get('/:id', async (req, res) => {
-  // ... อ่าน user ตาม id
-  res.json({ id: req.params.id, name: 'Alice', email: 'alice@example.com' });
-});
-
-router.patch('/:id', /*authMiddleware,*/ async (req, res) => {
-  // ... อัปเดต user
-  res.json({ id: req.params.id, name: 'Alice Updated', email: 'alice@example.com' });
-});
-
-router.delete('/:id', /*authMiddleware,*/ async (req, res) => {
-  // ... ลบ user
-  res.status(204).send();
+router.delete('/:id', async (req, res, next) => {
+  try { await Users.remove(+req.params.id); res.status(204).end(); } catch (e) { next(e); }
 });
 
 module.exports = router;
-

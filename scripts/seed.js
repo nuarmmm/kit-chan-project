@@ -3,7 +3,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../src/models/user.model');
 const Event = require('../src/models/event.model');
-const Registration = require('../src/models/registration.model');
+const Registration = require('../src/models/staffApplication.model.js');
 
 async function run() {
   try {
