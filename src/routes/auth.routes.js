@@ -33,7 +33,7 @@ const auth = require('../src/middlewares/auth.middleware');
  *       201: { description: Created }
  *       409: { description: Email exists }
  */
-router.post('/signUp', signup);
+router.post('/signup', signup);
 
 /**
  * @swagger
