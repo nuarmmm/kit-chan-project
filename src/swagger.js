@@ -12,10 +12,10 @@ const options = {
       description:
         "API for Users, Events, and Staff Applications (สมัครสตาฟ) – includes filters & pagination.",
     },
-    servers: [{ url: "http://localhost:3000/api", description: "Local" }],
+    servers: [{ url: 'http://localhost:3000/api', description: 'Local' }],
     components: {
       securitySchemes: {
-        BearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
+        bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
       },
       parameters: {
         PageParam: {
@@ -178,7 +178,7 @@ const options = {
       { name: "StaffApplications", description: "สมัครสตาฟต่อกิจกรรม" },
     ],
   },
-  apis: ["./src/routes/**/*.js", "./src/routes/*.js"],
+  apis: ['./src/routes/**/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

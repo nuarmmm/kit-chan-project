@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const path = require('path');
 
 const { setupSwagger } = require('./swagger');
 
@@ -15,7 +16,16 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
+// ✅ เสิร์ฟไฟล์ static จาก public (อยู่ใน src)
 app.use('/static', express.static(path.join(__dirname, 'public')));
+
+// ✅ ตั้งค่า EJS (ถ้าคุณมี views/login.ejs, views/register.ejs)
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+// หน้าเว็บ
+app.get('/',        (_req,res)=> res.redirect('/login'));
+app.get('/login',   (req,res)=> res.render('login',    { title:'เข้าสู่ระบบ' }));
+app.get('/register',(req,res)=> res.render('register', { title:'ลงทะเบียน' }));
 
 // ----- Mount routes -----
 app.use('/api/users', require('./routes/user.routes'));
