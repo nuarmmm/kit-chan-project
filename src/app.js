@@ -1,4 +1,3 @@
-// app.js
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
@@ -6,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 
 const { setupSwagger } = require('./swagger');
+const pool = require('./db'); // <- ใช้ดึงกิจกรรมจาก DB
 
 const app = express();
 app.use(cors({
@@ -14,35 +14,44 @@ app.use(cors({
 }));
   
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
-// ✅ เสิร์ฟไฟล์ static จาก public (อยู่ใน src)
-app.use('/static', express.static(path.join(__dirname, 'public')));
 
-// ✅ ตั้งค่า EJS (ถ้าคุณมี views/login.ejs, views/register.ejs)
-app.set('views', path.join(__dirname, 'views'));
+// ----- Static & Views -----
+app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
-// หน้าเว็บ
-app.get('/',        (_req,res)=> res.redirect('/login'));
-app.get('/login',   (req,res)=> res.render('login',    { title:'เข้าสู่ระบบ' }));
-app.get('/register',(req,res)=> res.render('register', { title:'ลงทะเบียน' }));
+app.set('views', path.join(__dirname, 'views')); // <-- สำคัญ
 
-// ----- Mount routes -----
+// ----- API (คงเดิม) -----
 app.use('/api/users', require('./routes/user.routes'));
 app.use('/api/events', require('./routes/event.routes'));
-app.use('/api', require('./routes/staffApplication.routes')); // <- รวม path ของใบสมัครสตาฟ
+app.use('/api/registrations', require('./routes/registration.routes'));
+const categoryRoutes = require('./routes/category.routes');
+app.use('/api/categories', categoryRoutes);
 
-app.use('/api/auth', require('./routes/auth.routes'));
-
-// ----- Swagger UI -----
+// ----- Swagger -----
 setupSwagger(app);
 
-app.use((req, res, _next) => {
-  res.status(404).json({ message: 'Not found', path: req.originalUrl });
-});
 
-// Error handler
-app.use((err, req, res, _next) => {
+// ----- หน้าเว็บ (SSR) -----
+app.get("/", (req, res) =>{
+  res.render("index")
+})
+
+app.get("/events", async (req, res) =>{
+  try {
+    const result = await pool.query('SELECT * FROM events ORDER BY id');
+    res.render("event", { events: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+})
+
+
+// ----- Error handler -----
+app.use((err, req, res, next) => {
   console.error(err);
   res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',
@@ -51,6 +60,4 @@ app.use((err, req, res, _next) => {
   });
 });
 
-module.exports = app;
-
-
+module.exports = app; // listen อยู่ที่ server.js

@@ -27,3 +27,4 @@ exports.update = async (req, res, next) => {
 exports.remove = async (req, res, next) => {
   try { await Event.remove(+req.params.id); res.json({ ok: true }); } catch (e) { next(e); }
 };
+

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>กิจกรรมคณะ IT</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/categories.js" defer></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="navbar">
+    <div class="logo">รอ logo ก่อน</div>
+      <nav>
+        <a href="#">หน้าแรก</a>
+        <a href="#">การแจ้งเตือน</a>
+      </nav>
+    <div class="avatar" aria-label="profile"></div>
+    </div> 
+  </header>
+  
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>กิจกรรม<br>คณะ IT</h1>
+      <p>เว็บไซต์ที่จะพาคุณมารู้จักกับกิจกรรมทั้งหมดของคณะเทคโนโลยีสารสนเทศที่นักศึกษาทุกคนได้เข้าร่วม</p>
+      <div class="hero-btns">
+        <button class="btn primary">เข้าสู่ระบบ</button>
+        <button class="btn secondary">ลงทะเบียน</button>
+      </div>
+    </div>
+    <div class="hero-img">
+      <img src="https://image-activity.s3.us-east-1.amazonaws.com/icon/image.png" alt="กิจกรรม">
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="categories">
+    <a href="#">กิจกรรมทั้งหมด</a>
+    <a href="#">วิชาการ</a>
+    <a href="#">กีฬาและนันทนาการ</a>
+    <a href="#">บำเพ็ญประโยชน์</a>
+    <a href="#">ส่งเสริมศิลปวัฒนธรรม</a>
+  </section>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <input type="text" placeholder="ค้นหากิจกรรม...">
+  </div>
+
+  <!-- Activity Section -->
+  <section class="activities" id="activities-section">
+    <h2 id="activities-title">กิจกรรมทั้งหมด</h2>
+    <div class="grid" id="activities-grid">
+      <div class="card" onclick="location.href='/events'">
+        <img src="https://image-activity.s3.us-east-1.amazonaws.com/ITcamp/itc1.jpeg" alt="">
+        <p>ITCamp21</p>
+      </div>
+      <div class="card" onclick="location.href='/events'">
+        <img src="https://image-activity.s3.us-east-1.amazonaws.com/TobeIT/tb1.jpg" alt="">
+        <p>TobeIT66</p>
+      </div>
+      <div class="card" onclick="location.href='/events'">
+        <img src="https://image-activity.s3.us-east-1.amazonaws.com/Unite/u1.jpg" alt="">
+        <p>UniteCamp7</p>
+      </div>
+      <div class="card" onclick="location.href='/events'">
+        <img src="https://image-activity.s3.us-east-1.amazonaws.com/IT3K/3k1.jpg" alt="">
+        <p>IT3K</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Camps Display Section -->
+  <div id="camp-content" class="camp-grid"></div>
+
+</body>
+</html>

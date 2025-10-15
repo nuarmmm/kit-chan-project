@@ -2,7 +2,7 @@
   "name": "kit-chan-project",
   "version": "1.0.0",
   "description": "\"# Kit-Chan Project\"",
-  "main": "src/app.js",
+  "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/nuarmmm/kit-chan-project#readme",
   "dependencies": {
+    "aws-sdk": "^2.1692.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
