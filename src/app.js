@@ -33,7 +33,10 @@ app.use('/api/registrations', staffAppRoutes);
 setupSwagger(app);
 
 // (ถ้ามี SSR page ค่อยใส่เพิ่มทีหลัง)
-
+// ----- หน้าเว็บ (SSR) -----
+app.get("/", (req, res) =>{
+  res.render("index")
+})
 // Error handler (คงไว้)
 app.use((err, _req, res, _next) => {
   console.error(err);
