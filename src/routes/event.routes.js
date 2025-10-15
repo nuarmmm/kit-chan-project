@@ -1,7 +1,6 @@
 // src/routes/event.routes.js
 const router = require('express').Router();
-const db = require('../db'); // <-- ใช้ pg pool/client ของคุณ
-
+const db = require('../db'); // pg Pool
 
 /**
  * @swagger
@@ -15,6 +14,9 @@ const db = require('../db'); // <-- ใช้ pg pool/client ของคุณ
  *       - $ref: '#/components/parameters/SearchParam'
  *       - $ref: '#/components/parameters/FromParam'
  *       - $ref: '#/components/parameters/ToParam'
+ *       - $ref: '#/components/parameters/RegFromParam'
+ *       - $ref: '#/components/parameters/RegToParam'
+ *       - $ref: '#/components/parameters/PublishedParam'
  *       - $ref: '#/components/parameters/SortParam'
  *     responses:
  *       200:
@@ -100,80 +102,89 @@ const db = require('../db'); // <-- ใช้ pg pool/client ของคุณ
  *       404: { description: Not found }
  */
 
-
-// helpers
-function buildOrder(sort = 'event_date') {
-  if (!sort) return 'event_date ASC';
+// ===== helper: safe order by =====
+function buildOrder(sort = 'start_at') {
+  if (!sort) return 'start_at ASC';
   const desc = String(sort).trim().startsWith('-');
-  const raw = String(sort).trim().replace(/^-/, '');
-
-  // map ชื่อที่คนชอบใช้ -> ชื่อคอลัมน์จริงใน DB
+  const raw  = String(sort).trim().replace(/^-/, '');
   const map = {
+    start_at: 'start_at',
+    end_at: 'end_at',
+    reg_open_at: 'reg_open_at',
+    reg_close_at: 'reg_close_at',
+    created_at: 'created_at',
     createdAt: 'created_at',
-    date: 'event_date',
     title: 'title',
     location: 'location',
-    capacity: 'capacity',     // ถ้ามีคอลัมน์นี้จริง (ดูจาก INSERT/RETURNING)
-    event_date: 'event_date',
-    created_at: 'created_at',
+    capacity: 'capacity',
     id: 'id',
   };
-
-  const col = map[raw] || 'event_date';   // default ปลอดภัย
-  const allowed = ['event_date', 'created_at', 'title', 'location', 'capacity', 'id'];
-  const safeCol = allowed.includes(col) ? col : 'event_date';
+  const allowed = Object.values(map);
+  const col = map[raw] || 'start_at';
+  const safeCol = allowed.includes(col) ? col : 'start_at';
   return `${safeCol} ${desc ? 'DESC' : 'ASC'}`;
 }
 
-
-// LIST with search/filter/pagination
+// ===== LIST (search/filter/pagination + images[]) =====
 router.get('/', async (req, res, next) => {
   try {
     const {
-      search,       // คำค้น
-      from, to,     // YYYY-MM-DD
+      search,
+      from, to,               // filter by start_at (YYYY-MM-DD)
+      reg_from, reg_to,       // filter by registration window
+      published,              // 'true' | 'false'
       page = 1,
       limit = 10,
-      sort = 'event_date', // รองรับรูปแบบ -createdAt/-event_date
+      sort = 'start_at',
     } = req.query;
 
     const where = [];
     const params = [];
+    const add = (sql, val) => { params.push(val); where.push(sql.replace('?', `$${params.length}`)); };
 
     if (search) {
-      params.push(`%${search}%`);
-      where.push(`(LOWER(title) LIKE LOWER($${params.length}) OR LOWER(location) LIKE LOWER($${params.length}))`);
+      add(`(LOWER(e.title) LIKE LOWER(?) OR LOWER(e.location) LIKE LOWER(?))`, `%${search}%`);
+      params.push(`%${search}%`); // สำหรับ location (ตัวที่สอง)
     }
-    if (from) {
-      params.push(from);
-      where.push(`event_date >= $${params.length}`);
-    }
-    if (to) {
-      params.push(to);
-      where.push(`event_date <= $${params.length}`);
-    }
+    if (from)      add(`e.start_at >= ?::timestamptz`, from);
+    if (to)        add(`e.start_at <= ?::timestamptz`, to);
+    if (reg_from)  add(`e.reg_open_at >= ?::timestamptz`, reg_from);
+    if (reg_to)    add(`e.reg_close_at <= ?::timestamptz`, reg_to);
+    if (published !== undefined) add(`e.is_published = ?`, String(published) === 'true');
 
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
-    // total count
-    const totalRes = await db.query(`SELECT COUNT(*)::int AS cnt FROM events ${whereSql}`, params);
+    // total
+    const totalRes = await db.query(`SELECT COUNT(*)::int AS cnt FROM events e ${whereSql}`, params);
     const total = totalRes.rows[0].cnt;
 
-    const pageNum = Number(page) || 1;
-    const limitNum = Math.min(Math.max(Number(limit) || 10, 1), 100);
-    const offset = (pageNum - 1) * limitNum;
-
+    const pageNum  = Math.max(1, Number(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, Number(limit) || 10));
+    const offset   = (pageNum - 1) * limitNum;
     const orderSql = buildOrder(sort);
 
     const listParams = [...params, limitNum, offset];
-    const listRes = await db.query(
-      `SELECT id, title, description, event_date, location, capacity, image_url, created_at
-       FROM events
-       ${whereSql}
-       ORDER BY ${orderSql}
-       LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
-      listParams
-    );
+    const limitIdx  = params.length + 1;
+    const offsetIdx = params.length + 2;
+
+    const sql = `
+      SELECT
+        e.id, e.title, e.description,
+        e.start_at, e.end_at,
+        e.reg_open_at, e.reg_close_at,
+        e.organizer, e.registration_url,
+        e.location, e.capacity, e.is_published,
+        e.image_url,
+        e.created_at, e.updated_at,
+        COALESCE(ARRAY_REMOVE(ARRAY_AGG(i.image_url ORDER BY i.sort_order), NULL), '{}') AS images
+      FROM events e
+      LEFT JOIN event_images i ON i.event_id = e.id
+      ${whereSql}
+      GROUP BY e.id
+      ORDER BY ${orderSql}
+      LIMIT $${limitIdx} OFFSET $${offsetIdx}
+    `;
+    const listRes = await db.query(sql, listParams);
 
     res.json({
       items: listRes.rows,
@@ -186,12 +197,25 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// GET one
+// ===== GET one (+images[]) =====
 router.get('/:id', async (req, res, next) => {
   try {
     const { rows } = await db.query(
-      `SELECT id, title, description, event_date, location, capacity, image_url, created_at
-       FROM events WHERE id = $1`,
+      `
+      SELECT
+        e.id, e.title, e.description,
+        e.start_at, e.end_at,
+        e.reg_open_at, e.reg_close_at,
+        e.organizer, e.registration_url,
+        e.location, e.capacity, e.is_published,
+        e.image_url,
+        e.created_at, e.updated_at,
+        COALESCE(ARRAY_REMOVE(ARRAY_AGG(i.image_url ORDER BY i.sort_order), NULL), '{}') AS images
+      FROM events e
+      LEFT JOIN event_images i ON i.event_id = e.id
+      WHERE e.id = $1
+      GROUP BY e.id
+      `,
       [req.params.id]
     );
     if (!rows.length) return res.status(404).json({ message: 'Event not found' });
@@ -201,54 +225,136 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// CREATE (ตอนนี้คุณยิงได้แล้วด้วย event_date)
+// ===== CREATE (รองรับ images[]) =====
 router.post('/', async (req, res, next) => {
+  const {
+    title, description,
+    start_at, end_at,
+    reg_open_at, reg_close_at,
+    organizer, registration_url,
+    location, capacity,
+    is_published = false,
+    image_url,
+    images = [],
+  } = req.body;
+
+  const client = await db.connect();
   try {
-    const { title, event_date, location, capacity, description, image_url } = req.body;
-    const { rows } = await db.query(
-      `INSERT INTO events (title, event_date, location, capacity, description, image_url)
-       VALUES ($1,$2,$3,$4,$5,$6)
-       RETURNING id, title, description, event_date, location, capacity, image_url, created_at`,
-      [title, event_date, location, capacity, description ?? null, image_url ?? null]
+    await client.query('BEGIN');
+
+    const { rows: [event] } = await client.query(
+      `
+      INSERT INTO events
+        (title, description, start_at, end_at, reg_open_at, reg_close_at,
+         organizer, registration_url, location, capacity, is_published, image_url)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+      RETURNING *
+      `,
+      [
+        title,
+        description ?? null,
+        start_at,
+        end_at ?? null,
+        reg_open_at ?? null,
+        reg_close_at ?? null,
+        organizer ?? null,
+        registration_url ?? null,
+        location ?? null,
+        capacity ?? 0,
+        is_published ?? false,
+        image_url ?? null,
+      ]
     );
-    res.status(201).json(rows[0]);
+
+    if (Array.isArray(images) && images.length) {
+      for (let i = 0; i < images.length; i++) {
+        await client.query(
+          `INSERT INTO event_images (event_id, image_url, sort_order) VALUES ($1,$2,$3)`,
+          [event.id, images[i], i]
+        );
+      }
+    }
+
+    const { rows: [full] } = await client.query(
+      `
+      SELECT e.*, COALESCE(ARRAY_REMOVE(ARRAY_AGG(i.image_url ORDER BY i.sort_order), NULL), '{}') AS images
+      FROM events e LEFT JOIN event_images i ON i.event_id = e.id
+      WHERE e.id = $1 GROUP BY e.id
+      `,
+      [event.id]
+    );
+
+    await client.query('COMMIT');
+    res.status(201).json(full);
   } catch (err) {
+    await client.query('ROLLBACK');
     next(err);
+  } finally {
+    client.release();
   }
 });
 
-// UPDATE
+// ===== UPDATE (patch fields; ถ้า body มี images[] จะ replace ทั้งชุด) =====
 router.put('/:id', async (req, res, next) => {
+  const allowed = [
+    'title','description','start_at','end_at','reg_open_at','reg_close_at',
+    'organizer','registration_url','location','capacity','is_published','image_url'
+  ];
+  const fields = [];
+  const vals = [];
+  allowed.forEach((k) => {
+    if (req.body[k] !== undefined) {
+      vals.push(req.body[k]);
+      fields.push(`${k} = $${vals.length}`);
+    }
+  });
+
+  const client = await db.connect();
   try {
-    // อัปเดตเฉพาะฟิลด์ที่ส่งมา
-    const fields = [];
-    const vals = [];
-    const allowed = ['title', 'event_date', 'location', 'capacity', 'description', 'image_url'];
+    await client.query('BEGIN');
 
-    allowed.forEach((k) => {
-      if (req.body[k] !== undefined) {
-        vals.push(req.body[k]);
-        fields.push(`${k} = $${vals.length}`);
+    if (fields.length) {
+      vals.push(req.params.id);
+      await client.query(
+        `UPDATE events SET ${fields.join(', ')}, updated_at = NOW() WHERE id = $${vals.length}`,
+        vals
+      );
+    }
+
+    if (Array.isArray(req.body.images)) {
+      await client.query(`DELETE FROM event_images WHERE event_id = $1`, [req.params.id]);
+      for (let i = 0; i < req.body.images.length; i++) {
+        await client.query(
+          `INSERT INTO event_images (event_id, image_url, sort_order) VALUES ($1,$2,$3)`,
+          [req.params.id, req.body.images[i], i]
+        );
       }
-    });
+    }
 
-    if (!fields.length) return res.status(400).json({ message: 'No fields to update' });
-
-    vals.push(req.params.id);
-
-    const { rows } = await db.query(
-      `UPDATE events SET ${fields.join(', ')} WHERE id = $${vals.length}
-       RETURNING id, title, description, event_date, location, capacity, image_url, created_at`,
-      vals
+    const { rows } = await client.query(
+      `
+      SELECT e.*, COALESCE(ARRAY_REMOVE(ARRAY_AGG(i.image_url ORDER BY i.sort_order), NULL), '{}') AS images
+      FROM events e LEFT JOIN event_images i ON i.event_id = e.id
+      WHERE e.id = $1 GROUP BY e.id
+      `,
+      [req.params.id]
     );
-    if (!rows.length) return res.status(404).json({ message: 'Event not found' });
+    if (!rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    await client.query('COMMIT');
     res.json(rows[0]);
   } catch (err) {
+    await client.query('ROLLBACK');
     next(err);
+  } finally {
+    client.release();
   }
 });
 
-// DELETE
+// ===== DELETE (event_images ถูกลบเพราะ ON DELETE CASCADE) =====
 router.delete('/:id', async (req, res, next) => {
   try {
     const { rowCount } = await db.query('DELETE FROM events WHERE id = $1', [req.params.id]);

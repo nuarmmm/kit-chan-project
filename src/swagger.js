@@ -18,46 +18,18 @@ const options = {
         bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
       },
       parameters: {
-        PageParam: {
-          name: "page", in: "query",
-          schema: { type: "integer", minimum: 1, default: 1 },
-          description: "Page number (pagination)",
-        },
-        LimitParam: {
-          name: "limit", in: "query",
-          schema: { type: "integer", minimum: 1, maximum: 100, default: 10 },
-          description: "Page size (pagination)",
-        },
-        SearchParam: {
-          name: "search", in: "query", schema: { type: "string" },
-          description: "Keyword search",
-        },
-        FromParam: {
-          name: "from", in: "query",
-          schema: { type: "string", format: "date" },
-          description: "Filter start date (YYYY-MM-DD)",
-        },
-        ToParam: {
-          name: "to", in: "query",
-          schema: { type: "string", format: "date" },
-          description: "Filter end date (YYYY-MM-DD)",
-        },
-        SortParam: {
-          name: "sort", in: "query",
-          schema: { type: "string", example: "-event_date" },
-          description: "Sort field (prefix with '-' for desc)",
-        },
+        PageParam: { name: "page", in: "query", schema: { type: "integer", minimum: 1, default: 1 }, description: "Page number (pagination)" },
+        LimitParam: { name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 100, default: 10 }, description: "Page size (pagination)" },
+        SearchParam: { name: "search", in: "query", schema: { type: "string" }, description: "Keyword search (title/location)" },
+        FromParam: { name: "from", in: "query", schema: { type: "string", format: "date" }, description: "Filter by start_at >= (YYYY-MM-DD)" },
+        ToParam: { name: "to", in: "query", schema: { type: "string", format: "date" }, description: "Filter by start_at <= (YYYY-MM-DD)" },
+        RegFromParam: { name: "reg_from", in: "query", schema: { type: "string", format: "date" }, description: "Filter by reg_open_at >= (YYYY-MM-DD)" },
+        RegToParam: { name: "reg_to", in: "query", schema: { type: "string", format: "date" }, description: "Filter by reg_close_at <= (YYYY-MM-DD)" },
+        SortParam: { name: "sort", in: "query", schema: { type: "string", example: "-start_at" }, description: "Sort field, prefix '-' for DESC" },
+        PublishedParam: { name: "published", in: "query", schema: { type: "boolean" }, description: "Filter by is_published" },
       },
       schemas: {
-        Meta: {
-          type: "object",
-          properties: {
-            page: { type: "integer" },
-            limit: { type: "integer" },
-            total: { type: "integer" },
-            pages: { type: "integer" },
-          },
-        },
+        Meta: { type: "object", properties: { page: { type: "integer" }, limit: { type: "integer" }, total: { type: "integer" }, pages: { type: "integer" } } },
 
         // ===== Users =====
         User: {
@@ -68,13 +40,13 @@ const options = {
             last_name: { type: "string" },
             full_name: { type: "string" },
             email: { type: "string", format: "email" },
-            role: { type: "string", enum: ["user","admin"] },
+            role: { type: "string", enum: ["user", "admin"] },
             created_at: { type: "string", format: "date-time" },
           },
         },
         UserCreate: {
           type: "object",
-          required: ["first_name","last_name","email","password"],
+          required: ["first_name", "last_name", "email", "password"],
           properties: {
             first_name: { type: "string" },
             last_name: { type: "string" },
@@ -89,34 +61,49 @@ const options = {
             last_name: { type: "string" },
             email: { type: "string", format: "email" },
             password: { type: "string", minLength: 6 },
-            role: { type: "string", enum: ["user","admin"] },
+            role: { type: "string", enum: ["user", "admin"] },
           },
         },
 
-        // ===== Events =====
+        // ===== Event =====
         Event: {
           type: "object",
           properties: {
             id: { type: "integer" },
             title: { type: "string" },
-            event_date: { type: "string", format: "date-time" },
-            location: { type: "string" },
-            capacity: { type: "integer" },
             description: { type: "string" },
-            image_url: { type: "string" },
+            start_at: { type: "string", format: "date-time" },
+            end_at: { type: "string", format: "date-time", nullable: true },
+            reg_open_at: { type: "string", format: "date-time", nullable: true },
+            reg_close_at: { type: "string", format: "date-time", nullable: true },
+            organizer: { type: "string", nullable: true },
+            registration_url: { type: "string", nullable: true },
+            location: { type: "string", nullable: true },
+            capacity: { type: "integer", nullable: true },
+            is_published: { type: "boolean" },
+            image_url: { type: "string", nullable: true },   // cover ถ้ามี
+            images: { type: "array", items: { type: "string" } }, // รูปย่อยจาก event_images
             created_at: { type: "string", format: "date-time" },
+            updated_at: { type: "string", format: "date-time" },
           },
         },
         EventCreate: {
           type: "object",
-          required: ["title","event_date"],
+          required: ["title", "start_at"],
           properties: {
             title: { type: "string" },
-            event_date: { type: "string", format: "date-time" },
+            description: { type: "string" },
+            start_at: { type: "string", format: "date-time" },
+            end_at: { type: "string", format: "date-time" },
+            reg_open_at: { type: "string", format: "date-time" },
+            reg_close_at: { type: "string", format: "date-time" },
+            organizer: { type: "string" },
+            registration_url: { type: "string" },
             location: { type: "string" },
             capacity: { type: "integer" },
-            description: { type: "string" },
+            is_published: { type: "boolean", default: false },
             image_url: { type: "string" },
+            images: { type: "array", items: { type: "string" } } // optional array ของ S3 URLs
           },
         },
         EventUpdate: { $ref: "#/components/schemas/EventCreate" },
@@ -137,37 +124,37 @@ const options = {
             cohort: { type: "string" },
             student_code: { type: "string" },
             title: { type: "string" },
-            status: { type: "string", enum: ["pending","approved","rejected"] },
+            status: { type: "string", enum: ["pending", "approved", "rejected"] },
           },
         },
         StaffApplicationCreate: {
           type: "object",
-          required: ["first_name","last_name","email"],
+          required: ["first_name", "last_name", "email"],
           properties: {
-            first_name:{type:"string"},
-            last_name:{type:"string"},
-            nickname:{type:"string"},
-            phone:{type:"string"},
-            major:{type:"string"},
-            cohort:{type:"string"},
-            student_code:{type:"string"},
-            title:{type:"string"},
-            email:{type:"string", format:"email"},
-            position_applied:{type:"string"},
-            experience:{type:"string"},
-            motivation:{type:"string"},
-            portfolio_url:{type:"string"},
-            resume_s3_url:{type:"string"},
+            first_name: { type: "string" },
+            last_name: { type: "string" },
+            nickname: { type: "string" },
+            phone: { type: "string" },
+            major: { type: "string" },
+            cohort: { type: "string" },
+            student_code: { type: "string" },
+            title: { type: "string" },
+            email: { type: "string", format: "email" },
+            position_applied: { type: "string" },
+            experience: { type: "string" },
+            motivation: { type: "string" },
+            portfolio_url: { type: "string" },
+            resume_s3_url: { type: "string" },
           }
         },
         StaffApplicationUpdate: {
-          type:"object",
-          properties:{
-            status:{type:"string", enum:["pending","approved","rejected"]},
-            first_name:{type:"string"},
-            last_name:{type:"string"},
-            nickname:{type:"string"},
-            phone:{type:"string"}
+          type: "object",
+          properties: {
+            status: { type: "string", enum: ["pending", "approved", "rejected"] },
+            first_name: { type: "string" },
+            last_name: { type: "string" },
+            nickname: { type: "string" },
+            phone: { type: "string" }
           }
         }
       },
