@@ -1,17 +1,9 @@
-// routes/auth.routes.js
+// src/routes/auth.routes.js
 const express = require('express');
 const router = express.Router();
 
-// ปรับ path ให้ตรงกับโครงของคุณ
-// const { register, login, me } = require('../src/controllers/auth.controller');
-// const auth = require('../src/middlewares/auth.middleware');
-
 const { register, login, me } = require('../controllers/auth.controller');
 const auth = require('../middlewares/auth.middleware');
-
-router.post('/register', register);
-router.post('/login', login);
-router.get('/me', auth, me);
 
 /**
  * @swagger
@@ -24,8 +16,7 @@ router.get('/me', auth, me);
  * @swagger
  * /auth/register:
  *   post:
- *     tags:
- *       - Auth
+ *     tags: [Auth]
  *     summary: Register a new user
  *     requestBody:
  *       required: true
@@ -33,23 +24,24 @@ router.get('/me', auth, me);
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
- *               - email
- *               - password
+ *             required: [first_name, last_name, email, password]
  *             properties:
- *               name:
+ *               first_name:
  *                 type: string
- *                 example: Alice Doe
+ *                 example: Alice
+ *               last_name:
+ *                 type: string
+ *                 example: Doe
  *               email:
  *                 type: string
  *                 example: alice@example.com
  *               password:
  *                 type: string
  *                 example: secret123
- *               role:
+ *               name:
  *                 type: string
- *                 example: student
+ *                 example: Alice Doe
+ *                 description: Optional. If sent, will be split into first/last.
  *     responses:
  *       '201':
  *         description: Created
@@ -62,8 +54,7 @@ router.post('/register', register);
  * @swagger
  * /auth/login:
  *   post:
- *     tags:
- *       - Auth
+ *     tags: [Auth]
  *     summary: Login and receive JWT token
  *     requestBody:
  *       required: true
@@ -71,9 +62,7 @@ router.post('/register', register);
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - email
- *               - password
+ *             required: [email, password]
  *             properties:
  *               email:
  *                 type: string
@@ -93,8 +82,7 @@ router.post('/login', login);
  * @swagger
  * /auth/me:
  *   get:
- *     tags:
- *       - Auth
+ *     tags: [Auth]
  *     summary: Get current user profile (from JWT)
  *     security:
  *       - bearerAuth: []
