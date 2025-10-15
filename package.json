@@ -2,9 +2,9 @@
   "name": "kit-chan-project",
   "version": "1.0.0",
   "description": "\"# Kit-Chan Project\"",
-  "main": "src/app.js",
+  "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon src/app.js",
+    "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "docs:open": "node -e \"console.log('Open http://localhost:3000/api-docs')\"",
     "docs:print": "node -e \"console.log(JSON.stringify(require('./swagger').__spec || {}))\""
