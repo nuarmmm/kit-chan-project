@@ -37,6 +37,15 @@ setupSwagger(app);
 app.get("/", (req, res) =>{
   res.render("index")
 })
+app.get("/events", async (req, res) =>{
+  try {
+    const result = await pool.query('SELECT * FROM events ORDER BY id');
+    res.render("event", { events: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+})
 // Error handler (คงไว้)
 app.use((err, _req, res, _next) => {
   console.error(err);
