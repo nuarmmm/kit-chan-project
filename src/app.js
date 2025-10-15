@@ -22,6 +22,8 @@ app.set('views', path.join(__dirname, 'views')); // <-- สำคัญ
 app.use('/api/users', require('./routes/user.routes'));
 app.use('/api/events', require('./routes/event.routes'));
 app.use('/api/registrations', require('./routes/registration.routes'));
+const categoryRoutes = require('./routes/category.routes');
+app.use('/api/categories', categoryRoutes);
 
 // ----- Swagger -----
 setupSwagger(app);
@@ -30,6 +32,17 @@ setupSwagger(app);
 app.get("/", (req, res) =>{
   res.render("index")
 })
+
+app.get("/events", async (req, res) =>{
+  try {
+    const result = await pool.query('SELECT * FROM events ORDER BY id');
+    res.render("event", { events: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+})
+
 
 // ----- Error handler -----
 app.use((err, req, res, next) => {
@@ -41,5 +54,7 @@ app.use((err, req, res, next) => {
     details: err.details || [],
   });
 });
+
+
 
 module.exports = app; // listen อยู่ที่ server.js

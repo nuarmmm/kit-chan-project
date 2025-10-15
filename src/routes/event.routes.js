@@ -15,6 +15,16 @@ const db = require('../db'); // <-- ใช้ pg pool/client ของคุณ
  *       - $ref: '#/components/parameters/SearchParam'
  *       - $ref: '#/components/parameters/FromParam'
  *       - $ref: '#/components/parameters/ToParam'
+const activitiesMock = require('../mock/activities.mock');
+
+function findActivityById(id) {
+  id = Number(id);
+  for (const activities of Object.values(activitiesMock)) {
+    const found = activities.find(act => act.id === id);
+    if (found) return found;
+  }
+  return null;
+}
  *       - $ref: '#/components/parameters/SortParam'
  *     responses:
  *       200:
@@ -62,6 +72,11 @@ const db = require('../db'); // <-- ใช้ pg pool/client ของคุณ
  *       200:
  *         description: Event
  *         content:
+router.get('/:id', (req, res) => {
+  const activity = findActivityById(req.params.id);
+  if (!activity) return res.status(404).send('ไม่พบกิจกรรม');
+  res.render('event', { activity });
+});
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Event' }
  *       404: { description: Not found }

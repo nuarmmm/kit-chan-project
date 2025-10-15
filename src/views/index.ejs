@@ -5,20 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>กิจกรรมคณะ IT</title>
   <link rel="stylesheet" href="/css/style.css">
-
-  
+  <script src="/js/categories.js" defer></script>
 </head>
 <body>
 
   <!-- Header -->
   <header class="navbar">
     <div class="logo">รอ logo ก่อน</div>
-    <nav>
-      <a href="#">หน้าแรก</a>
-      <a href="#">โมดูลส์</a>
-      <a href="#">กิจกรรมทั้งหมด</a>
-    </nav>
+      <nav>
+        <a href="#">หน้าแรก</a>
+        <a href="#">การแจ้งเตือน</a>
+      </nav>
+    <div class="avatar" aria-label="profile"></div>
+    </div> 
   </header>
+  
 
   <!-- Hero Section -->
   <section class="hero">
@@ -37,6 +38,7 @@
 
   <!-- Categories -->
   <section class="categories">
+    <a href="#">กิจกรรมทั้งหมด</a>
     <a href="#">วิชาการ</a>
     <a href="#">กีฬาและนันทนาการ</a>
     <a href="#">บำเพ็ญประโยชน์</a>
@@ -49,27 +51,30 @@
   </div>
 
   <!-- Activity Section -->
-  <section class="activities">
-    <h2>กิจกรรมทั้งหมด</h2>
-    <div class="grid">
-      <div class="card">
+  <section class="activities" id="activities-section">
+    <h2 id="activities-title">กิจกรรมทั้งหมด</h2>
+    <div class="grid" id="activities-grid">
+      <div class="card" onclick="location.href='/events'">
         <img src="https://image-activity.s3.us-east-1.amazonaws.com/ITcamp/itc1.jpeg" alt="">
         <p>ITCamp21</p>
       </div>
-      <div class="card">
+      <div class="card" onclick="location.href='/events'">
         <img src="https://image-activity.s3.us-east-1.amazonaws.com/TobeIT/tb1.jpg" alt="">
         <p>TobeIT66</p>
       </div>
-      <div class="card">
+      <div class="card" onclick="location.href='/events'">
         <img src="https://image-activity.s3.us-east-1.amazonaws.com/Unite/u1.jpg" alt="">
         <p>UniteCamp7</p>
       </div>
-      <div class="card">
+      <div class="card" onclick="location.href='/events'">
         <img src="https://image-activity.s3.us-east-1.amazonaws.com/IT3K/3k1.jpg" alt="">
         <p>IT3K</p>
       </div>
     </div>
   </section>
+
+  <!-- Camps Display Section -->
+  <div id="camp-content" class="camp-grid"></div>
 
 </body>
 </html>

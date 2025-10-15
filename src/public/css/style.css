@@ -17,8 +17,37 @@ body {
 .navbar nav a {
   margin-left: 20px;
   text-decoration: none;
+  justify-content: center;
   color: #333;
   font-weight: 500;
+}
+
+.topbar__inner {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center
+}
+
+.links a {
+    color: #374151;
+    text-decoration: none;
+    margin-right: 18px;
+    font-size: 14px
+}
+
+.links a:hover {
+    color: #111827
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid var(--stroke);
+    background: linear-gradient(135deg, #f3f4f6, #fff)
 }
 
 /* Hero Section */
@@ -104,11 +133,15 @@ body {
   margin-bottom: 1.5rem;
 }
 
+
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, 270px);
+  justify-content: center;
   gap: 20px;
 }
+
 
 .card {
   background: #fff;
@@ -116,14 +149,55 @@ body {
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   text-align: center;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 270px;
+  height: 340px;
+  min-width: 270px;
+  max-width: 270px;
+  min-height: 340px;
+  max-height: 340px;
 }
 
 .card img {
   width: 100%;
-  height: auto;
+  height: 220px;
+  object-fit: cover;
+  display: block;
 }
 
 .card p {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 10px;
   font-weight: 500;
+  margin: 0;
+}
+
+.camp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.camp-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.camp-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.camp-card h3 {
+  padding: 15px;
+  margin: 0;
+  text-align: center;
 }
