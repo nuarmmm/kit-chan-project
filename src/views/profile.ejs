@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/profile.css" />
+</head>
+<body>
+    <header class="topbar">
+    <div class="topbar__inner">
+      <nav class="links">
+        <a href="/">หน้าหลัก</a>
+        <a href="#">การแจ้งเตือน</a>
+      </nav>
+      <div class="avatar" aria-label="profile"></div>
+    </div>
+    
+  </header>
+  <div class="container py-4">
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="field"><span class="field-label">ชื่อจริง</span><span id="first_name" class="field-value">—</span></div>
+        <div class="field"><span class="field-label">นามสกุล</span><span id="last_name"  class="field-value">—</span></div>
+        <div class="field"><span class="field-label">อีเมล</span>   <span id="email"      class="field-value">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // ยังไม่ล็อกอิน -> ไปหน้า login
+      window.location.href = '/login';
+    }
+
+    async function loadProfile() {
+      const res = await fetch('/api/users/me', {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+
+      // โทเค็นหมดอายุ/ไม่ถูกต้อง -> เคลียร์แล้วพาไป login
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
+      if (!res.ok) throw new Error(await res.text());
+
+      const u = await res.json();
+      document.getElementById('first_name').textContent = u.first_name || '—';
+      document.getElementById('last_name').textContent  = u.last_name  || '—';
+      document.getElementById('email').textContent      = u.email      || '—';
+    }
+
+    loadProfile().catch(err => {
+      console.error(err);
+      alert('โหลดข้อมูลโปรไฟล์ไม่สำเร็จ');
+    });
+  </script>
+</body>
+</html>
