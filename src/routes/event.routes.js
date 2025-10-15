@@ -140,12 +140,18 @@ router.get('/', async (req, res, next) => {
 
     const where = [];
     const params = [];
-    const add = (sql, val) => { params.push(val); where.push(sql.replace('?', `$${params.length}`)); };
 
-    if (search) {
-      add(`(LOWER(e.title) LIKE LOWER(?) OR LOWER(e.location) LIKE LOWER(?))`, `%${search}%`);
-      params.push(`%${search}%`); // สำหรับ location (ตัวที่สอง)
-    }
+    // ✅ helper ตัวใหม่: รองรับหลาย ? ในสตริงเดียว
+    const add = (sqlPart, ...vals) => {
+      const base = params.length;
+      let i = 0;
+      const sqlFixed = sqlPart.replace(/\?/g, () => `$${base + (++i)}`);
+      params.push(...vals);
+      where.push(sqlFixed);
+    };
+
+    // ✅ ใช้ ILIKE (ไม่ต้อง LOWER(...)) และแทนค่า 2 ตัวถูกต้อง
+    if (search) add(`(e.title ILIKE ? OR e.location ILIKE ?)`, `%${search}%`, `%${search}%`);
     if (from)      add(`e.start_at >= ?::timestamptz`, from);
     if (to)        add(`e.start_at <= ?::timestamptz`, to);
     if (reg_from)  add(`e.reg_open_at >= ?::timestamptz`, reg_from);
