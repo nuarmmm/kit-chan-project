@@ -34,7 +34,7 @@ app.get("/", (req, res) =>{
 })
 
 
-app.get('/profile', (_req, res) => res.render('profile'));
+app.get('/profile', (req, res) => res.render('profile'));
 
 app.get("/events/:id", async (req, res) =>{
   try {
@@ -45,6 +45,11 @@ app.get("/events/:id", async (req, res) =>{
   } catch (err) {
     res.status(500).send('เกิดข้อผิดพลาด');
   }
+});
+
+app.get('/staff-apply/:id', (req, res) => {
+  const eventId = req.params.id;
+  res.render('Staff-apply', { eventId });
 });
 
 app.get('/login', (req, res) => res.render('Login'));

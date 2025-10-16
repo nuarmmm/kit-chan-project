@@ -17,7 +17,7 @@
         <a href="/">หน้าหลัก</a>
         <a href="#">การแจ้งเตือน</a>
       </nav>
-      <div class="avatar" aria-label="profile"></div>
+      <div class="avatar" id="profileAvatar" aria-label="profile"></div>
     </div>
     
   </header>
@@ -62,7 +62,7 @@
       </div>
 
       <div class="actions">
-        <a class="btn" href="<%= activity.registration_url %>">สมัคร</a>
+        <a class="btn" href="/events/<%= activity.id %>/staff-apply">สมัคร</a>
       </div>
     </section>
   </main>

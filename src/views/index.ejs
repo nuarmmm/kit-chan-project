@@ -17,7 +17,7 @@
         <a href="#">หน้าแรก</a>
         <a href="#">การแจ้งเตือน</a>
       </nav>
-    <div class="avatar" aria-label="profile"></div>
+    <div class="avatar" id="profileAvatar" aria-label="profile"></div>
     </div> 
   </header>
   
@@ -94,6 +94,16 @@
       const registerBtn = document.getElementById('registerBtn');
       if (loginBtn) loginBtn.style.display = 'none';
       if (registerBtn) registerBtn.style.display = 'none';
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const avatar = document.getElementById('profileAvatar');
+    if (avatar) {
+      avatar.style.cursor = 'pointer';
+      avatar.addEventListener('click', () => {
+        window.location.href = '/profile';
+      });
     }
   });
   </script>
