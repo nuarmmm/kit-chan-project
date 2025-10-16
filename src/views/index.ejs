@@ -28,8 +28,8 @@
       <h1>กิจกรรม<br>คณะ IT</h1>
       <p>เว็บไซต์ที่จะพาคุณมารู้จักกับกิจกรรมทั้งหมดของคณะเทคโนโลยีสารสนเทศที่นักศึกษาทุกคนได้เข้าร่วม</p>
       <div class="hero-btns">
-        <a href="/login" class="btn primary">เข้าสู่ระบบ</a>
-        <a href="/register" class="btn secondary">ลงทะเบียน</a>
+        <a href="/login" class="btn primary" id="loginBtn">เข้าสู่ระบบ</a>
+        <a href="/register" class="btn secondary" id="registerBtn">ลงทะเบียน</a>
       </div>
     </div>
     <div class="hero-img">
@@ -81,5 +81,16 @@
   <!-- Camps Display Section -->
   <div id="camp-content" class="camp-grid"></div>
 
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // ถ้ามี token แสดงว่า login แล้ว ให้ซ่อนปุ่ม
+    if (localStorage.getItem('token')) {
+      const loginBtn = document.getElementById('loginBtn');
+      const registerBtn = document.getElementById('registerBtn');
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (registerBtn) registerBtn.style.display = 'none';
+    }
+  });
+  </script>
 </body>
 </html>
