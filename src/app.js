@@ -22,14 +22,9 @@ app.set('views', path.join(__dirname, 'views'));
 app.use('/api/users', require('./routes/user.routes'));
 app.use('/api/events', require('./routes/event.routes'));
 app.use('/api/categories', require('./routes/category.routes'));
+app.use(require('./routes/staffApplication.web.routes'));
 
-const staffAppRoutes = require('./routes/staffApplication.routes');
-app.use('/api', staffAppRoutes); // ✅ ถูกต้อง
-
-// alias ชั่วคราวถ้า client เก่าเรียก /registrations
-app.use('/api/registrations', staffAppRoutes);
-
-// Swagger
+// ----- Swagger UI -----
 setupSwagger(app);
 
 // (ถ้ามี SSR page ค่อยใส่เพิ่มทีหลัง)
