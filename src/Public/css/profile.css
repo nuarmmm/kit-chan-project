@@ -1,0 +1,117 @@
+:root {
+    --brand: #4c5d87;
+    --ink: #222;
+    --muted: #6b7280;
+    --stroke: #e5e7eb;
+    --bg: #fafbfc;
+    --container: 980px;
+    --radius: 14px;
+}
+
+*{ box-sizing: border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, Segoe UI, Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink)
+}
+
+
+/* ขนาดหน้าโดยรวม */
+.container{ max-width: 900px; margin:0 auto; padding:0 16px; }
+
+/* การ์ดข้อมูล */
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(28,54,92,.06);
+  padding:20px;             /* ใช้ได้แม้ไม่มี .card-body */
+  margin: 0 auto;
+}
+
+/* top bar */
+.topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--stroke)
+}
+
+.topbar__inner {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center
+}
+
+.links a {
+    color: #374151;
+    text-decoration: none;
+    margin-right: 18px;
+    font-size: 14px
+}
+
+.links a:hover {
+    color: #111827
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid var(--stroke);
+    background: linear-gradient(135deg, #f3f4f6, #fff)
+}
+
+/* แถวข้อมูล (ไม่ใช้ .row ของ Bootstrap เพื่อเลี่ยงชน) */
+.field{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  margin:14px 0;
+  flex-wrap:wrap;
+}
+
+/* ป้ายชื่อซ้าย */
+.field-label{
+  flex:0 0 180px;
+  color:var(--muted);
+  font-weight:600;
+  padding-top:9px;
+}
+
+/* ค่าจริงขวา (สไตล์คล้าย input) */
+.field-value{
+  flex:1 1 auto;
+  min-width:220px;
+  background:#fff;
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  padding:10px 12px;
+  font-size:1.02rem;
+  font-weight:500;
+  color:var(--text);
+  word-break:break-word;
+}
+.field-value:empty::before{ content:'—'; color:#9CA3AF; }
+
+/* เส้นแบ่งบางๆ ระหว่างแถว (เหมือนฟอร์มตัวอย่าง) */
+.field + .field{
+  border-top:1px dashed #EEF2FF;
+  padding-top:14px;
+}
+
+/* Responsive */
+@media (max-width: 576px){
+  .field{ flex-direction:column; }
+  .field-label{ flex:0 0 auto; padding-top:0; }
+  .field + .field{ border-top:none; }
+}

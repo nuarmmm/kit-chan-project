@@ -38,7 +38,10 @@ app.get("/", (req, res) =>{
   res.render("index")
 })
 
-app.get('/events/:id', async (req, res) => {
+
+app.get('/profile', (_req, res) => res.render('profile'));
+
+app.get("/events/:id", async (req, res) =>{
   try {
     const apiRes = await fetch(`http://localhost:3000/api/events/${req.params.id}`);
     if (!apiRes.ok) return res.status(404).send('ไม่พบกิจกรรม');

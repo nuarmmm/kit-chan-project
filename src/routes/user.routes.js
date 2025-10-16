@@ -13,6 +13,27 @@ const { requireRole } = require('../middlewares/auth.middleware');
 
 /**
  * @swagger
+ * /users/me:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get current user's profile (self)
+ *     security:
+ *       - bearerAuth: []   # ต้องตรงกับชื่อใน swagger.js
+ *     responses:
+ *       200: { description: OK }
+ *       401: { description: Unauthorized }
+ *       404: { description: Not found }
+ */
+router.get('/me', auth, async (req, res, next) => {
+  try {
+    const row = await Users.findById(req.user.id);
+    if (!row) return res.status(404).json({ message: 'Not found' });
+    res.json(row); // ไม่คืน password/password_hash
+  } catch (e) { next(e); }
+});
+
+/**
+ * @swagger
  * /users:
  *   get:
  *     tags: [Users]
