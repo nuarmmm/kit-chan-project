@@ -1,4 +1,4 @@
- // src/db.js
+// src/db.js
 const { Pool } = require('pg');
 require('dotenv').config();
 
@@ -8,11 +8,14 @@ const pool = new Pool({
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
-  ssl: { rejectUnauthorized: false }   // ✅ บังคับใช้ SSL (dev ใช้ง่ายสุด)
+  ssl: { rejectUnauthorized: false }
 });
 
-pool.connect()
-  .then(() => console.log('✅ PostgreSQL connected'))
-  .catch(err => console.error('❌ DB connection error:', err));
+// กัน log ตอนเทสต์
+if (process.env.NODE_ENV !== 'test') {
+  pool.connect()
+    .then(() => console.log('✅ PostgreSQL connected'))
+    .catch(err => console.error('❌ DB connection error:', err));
+}
 
 module.exports = pool;

@@ -131,7 +131,7 @@ router.get('/', async (req, res, next) => {
   try {
     const {
       search,
-      from, to,               // filter by start_at (YYYY-MM-DD)
+      from, to,               // filter by start_at
       reg_from, reg_to,       // filter by registration window
       published,              // 'true' | 'false'
       page = 1,
@@ -139,18 +139,54 @@ router.get('/', async (req, res, next) => {
       sort = 'start_at',
     } = req.query;
 
+    // --- helper: แปลงรูปแบบวันที่แบบย่อให้เป็นช่วงเวลาจริง ---
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const expandDate = (s, kind /* 'from' | 'to' */) => {
+      if (!s) return s;
+      if (/^\d{4}$/.test(s)) {
+        // ปีอย่างเดียว
+        return kind === 'from'
+          ? `${s}-01-01`
+          : `${s}-12-31 23:59:59`;
+      }
+      if (/^\d{4}-\d{2}$/.test(s)) {
+        // ปี-เดือน
+        const [y, m] = s.split('-').map(Number);
+        const lastDay = new Date(y, m, 0).getDate(); // วันสุดท้ายของเดือน
+        return kind === 'from'
+          ? `${y}-${pad2(m)}-01`
+          : `${y}-${pad2(m)}-${pad2(lastDay)} 23:59:59`;
+      }
+      // อื่นๆ (YYYY-MM-DD / ISO) ให้ใช้ตามเดิม
+      return s;
+    };
+
+    const fromX = expandDate(from, 'from');
+    const toX   = expandDate(to,   'to');
+
     const where = [];
     const params = [];
-    const add = (sql, val) => { params.push(val); where.push(sql.replace('?', `$${params.length}`)); };
 
-    if (search) {
-      add(`(LOWER(e.title) LIKE LOWER(?) OR LOWER(e.location) LIKE LOWER(?))`, `%${search}%`);
-      params.push(`%${search}%`); // สำหรับ location (ตัวที่สอง)
-    }
-    if (from)      add(`e.start_at >= ?::timestamptz`, from);
-    if (to)        add(`e.start_at <= ?::timestamptz`, to);
-    if (reg_from)  add(`e.reg_open_at >= ?::timestamptz`, reg_from);
-    if (reg_to)    add(`e.reg_close_at <= ?::timestamptz`, reg_to);
+    // รองรับหลาย ? ในสตริงเดียว
+    const add = (sqlPart, ...vals) => {
+      const base = params.length;
+      let i = 0;
+      const sqlFixed = sqlPart.replace(/\?/g, () => `$${base + (++i)}`);
+      params.push(...vals);
+      where.push(sqlFixed);
+    };
+
+    // ค้นชื่อ/สถานที่ (ไม่สนตัวพิมพ์)
+    if (search) add(`(e.title ILIKE ? OR e.location ILIKE ?)`, `%${search}%`, `%${search}%`);
+
+    // กรองช่วงวันที่จัด
+    if (fromX) add(`e.start_at >= ?::timestamptz`, fromX);
+    if (toX)   add(`e.start_at <= ?::timestamptz`, toX);
+
+    // กรองช่วงรับสมัคร
+    if (reg_from) add(`e.reg_open_at >= ?::timestamptz`, reg_from);
+    if (reg_to)   add(`e.reg_close_at <= ?::timestamptz`, reg_to);
+
     if (published !== undefined) add(`e.is_published = ?`, String(published) === 'true');
 
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
@@ -197,6 +233,7 @@ router.get('/', async (req, res, next) => {
     next(err);
   }
 });
+
 
 // ===== GET one (+images[]) =====
 router.get('/:id', async (req, res, next) => {
