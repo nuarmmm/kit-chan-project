@@ -54,8 +54,15 @@ app.get("/events/:id", async (req, res) =>{
 });
 
 app.get('/staff-apply/:id', (req, res) => {
+app.get('/staff-apply/:id', async (req, res) => {
   const eventId = req.params.id;
-  res.render('Staff-apply', { eventId });
+  let activity = null;
+  try {
+    const apiRes = await fetch(`http://localhost:3000/api/events/${eventId}`);
+    if (apiRes.ok) activity = await apiRes.json();
+  } catch {}
+  res.render('Staff-apply', { eventId, activity });
+});
 });
 
 app.get('/login', (req, res) => res.render('Login'));
