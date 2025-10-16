@@ -12,6 +12,9 @@ app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*', credentials: 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+// app.js
+app.use('/api/auth', require('./routes/auth.routes'));
+
 
 // Static & Views
 app.use(express.static(path.join(__dirname, 'Public'))); // P ใหญ่ให้ตรงโฟลเดอร์
