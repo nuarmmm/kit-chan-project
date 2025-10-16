@@ -37,15 +37,21 @@ setupSwagger(app);
 app.get("/", (req, res) =>{
   res.render("index")
 })
-app.get("/events", async (req, res) =>{
+
+app.get('/events/:id', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM events ORDER BY id');
-    res.render("event", { events: result.rows });
+    const apiRes = await fetch(`http://localhost:3000/api/events/${req.params.id}`);
+    if (!apiRes.ok) return res.status(404).send('ไม่พบกิจกรรม');
+    const activity = await apiRes.json();
+    res.render('event', { activity });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send('เกิดข้อผิดพลาด');
   }
-})
+});
+
+app.get('/login', (req, res) => res.render('Login'));
+app.get('/register', (req, res) => res.render('Register'));
+
 // Error handler (คงไว้)
 app.use((err, _req, res, _next) => {
   console.error(err);

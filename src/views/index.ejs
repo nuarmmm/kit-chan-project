@@ -6,12 +6,13 @@
   <title>กิจกรรมคณะ IT</title>
   <link rel="stylesheet" href="/css/style.css">
   <script src="/js/categories.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&family=Kanit:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <!-- Header -->
   <header class="navbar">
-    <div class="logo">รอ logo ก่อน</div>
+    <div class="logo">กิจจัง</div>
       <nav>
         <a href="#">หน้าแรก</a>
         <a href="#">การแจ้งเตือน</a>
@@ -27,8 +28,8 @@
       <h1>กิจกรรม<br>คณะ IT</h1>
       <p>เว็บไซต์ที่จะพาคุณมารู้จักกับกิจกรรมทั้งหมดของคณะเทคโนโลยีสารสนเทศที่นักศึกษาทุกคนได้เข้าร่วม</p>
       <div class="hero-btns">
-        <button class="btn primary">เข้าสู่ระบบ</button>
-        <button class="btn secondary">ลงทะเบียน</button>
+        <a href="/login" class="btn primary">เข้าสู่ระบบ</a>
+        <a href="/register" class="btn secondary">ลงทะเบียน</a>
       </div>
     </div>
     <div class="hero-img">
@@ -54,21 +55,25 @@
   <section class="activities" id="activities-section">
     <h2 id="activities-title">กิจกรรมทั้งหมด</h2>
     <div class="grid" id="activities-grid">
-      <div class="card" onclick="location.href='/events'">
+      <div class="card" onclick="location.href='/events/7'">
         <img src="https://image-activity.s3.us-east-1.amazonaws.com/ITcamp/itc1.jpeg" alt="">
         <p>ITCamp21</p>
       </div>
-      <div class="card" onclick="location.href='/events'">
+      <div class="card" onclick="location.href='/events/8'">
         <img src="https://image-activity.s3.us-east-1.amazonaws.com/TobeIT/tb1.jpg" alt="">
         <p>TobeIT66</p>
       </div>
-      <div class="card" onclick="location.href='/events'">
+      <div class="card" onclick="location.href='/events/9'">
         <img src="https://image-activity.s3.us-east-1.amazonaws.com/Unite/u1.jpg" alt="">
         <p>UniteCamp7</p>
       </div>
-      <div class="card" onclick="location.href='/events'">
+      <div class="card" onclick="location.href='/events/10'">
         <img src="https://image-activity.s3.us-east-1.amazonaws.com/IT3K/3k1.jpg" alt="">
         <p>IT3K</p>
+      </div>
+      <div class="card" onclick="location.href='/events/11'">
+        <img src="https://image-activity.s3.us-east-1.amazonaws.com/prepro/p1.jpg" alt="">
+        <p>Pre-programming</p>
       </div>
     </div>
   </section>

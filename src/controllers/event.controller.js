@@ -1,5 +1,6 @@
 // src/controllers/event.controller.js
 const Event = require('../models/event.model');
+const EventModel = require('../models/event.model');
 
 exports.list = async (_req, res, next) => {
   try { res.json(await Event.findAll()); } catch (e) { next(e); }
@@ -27,4 +28,5 @@ exports.update = async (req, res, next) => {
 exports.remove = async (req, res, next) => {
   try { await Event.remove(+req.params.id); res.json({ ok: true }); } catch (e) { next(e); }
 };
+
 
