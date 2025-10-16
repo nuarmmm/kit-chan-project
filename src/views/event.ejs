@@ -42,11 +42,18 @@
       <div class="info-grid">
         <div class="info">
           <h3>วันที่จัดกิจกรรม</h3>
-          <p><%= activity.start_at %> – <%= activity.end_at %></p>
+          <p>
+            <% function formatDate(dateStr) {
+              if (!dateStr) return '';
+              const d = new Date(dateStr);
+              return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+            } %>
+            <%= formatDate(activity.start_at) %> – <%= formatDate(activity.end_at) %>
+          </p>
         </div>
         <div class="info">
           <h3>วันรับสมัคร</h3>
-          <p><%= activity.reg_open_at %> – <%= activity.reg_close_at %></p>
+          <p><%= formatDate(activity.reg_open_at) %> – <%= formatDate(activity.reg_close_at) %></p>
         </div>
         <div class="info">
           <h3>สถานที่จัดกิจกรรม</h3>
