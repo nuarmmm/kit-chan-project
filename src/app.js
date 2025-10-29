@@ -25,9 +25,13 @@ app.set('views', path.join(__dirname, 'views'));
 app.use('/api/users', require('./routes/user.routes'));
 app.use('/api/events', require('./routes/event.routes'));
 app.use('/api/categories', require('./routes/category.routes'));
-// ✅ เพิ่มบรรทัดนี้ (mount API สมัครสตาฟ)
+// เพิ่มบรรทัดนี้ (mount API สมัครสตาฟ)
 app.use('/api', require('./routes/staffApplication.routes'));
 app.use(require('./routes/staffApplication.web.routes'));
+app.use(require('./routes/adminApplicants.web.routes'));
+
+// app.use(require('./routes/dev.preview.routes'));
+
 
 
 // ----- Swagger UI -----

@@ -1,0 +1,74 @@
+:root{
+  --bg:#f7f7f8;
+  --card:#ffffff;
+  --border:#e6e8ee;
+  --text:#1f2937;
+  --primary:#5b6fb7;
+  --primary-press:#4a5fa2;
+  --shadow:0 1px 2px rgba(0,0,0,.05), 0 4px 12px rgba(0,0,0,.06);
+}
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:'Prompt',system-ui,-apple-system,Segoe UI,Roboto,Arial,'Helvetica Neue',sans-serif;
+  line-height:1.6;
+}
+
+/* Topbar */
+.topbar{ padding:12px 24px; }
+.topbar__links{
+  max-width:1100px; margin:0 auto;
+  display:flex; align-items:center; justify-content:flex-end; gap:20px;
+}
+.topbar__link{ font-size:.9rem; color:#333; text-decoration:none; opacity:.85; }
+.topbar__link:hover{ opacity:1; text-decoration:underline; }
+.topbar__avatar{ width:36px; height:36px; border-radius:50%; object-fit:cover; border:1px solid var(--border); }
+
+/* Page */
+.container{ max-width:1100px; margin:8px auto 40px; padding:0 24px; }
+.page-title{ font-family:'Kanit','Prompt',sans-serif; font-weight:700; font-size:1.6rem; margin:8px 0 16px; }
+.page-title .event-name{ margin-left:.25rem; }
+
+/* Panel */
+.panel{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  padding:12px; min-height:360px;
+}
+
+/* List */
+.applicant-list{
+  list-style:none; margin:0; padding:0;
+  max-height:340px; overflow:auto; padding-right:8px;
+}
+.applicant-item{
+  display:flex; align-items:center; gap:14px;
+  padding:12px 10px; border-radius:10px;
+}
+.applicant-item + .applicant-item{ border-top:1px solid var(--border); }
+
+.avatar{
+  width:40px; height:40px; border-radius:50%;
+  object-fit:cover; border:1px solid var(--border); background:#fff;
+}
+.name{ flex:1; font-weight:500; }
+
+/* Button */
+.btn{
+  appearance:none; border:0; cursor:pointer;
+  background:var(--primary); color:#fff;
+  padding:10px 14px; border-radius:999px;
+  font-family:inherit; font-size:.92rem;
+  box-shadow:0 2px 6px rgba(37,99,235,.15);
+}
+.btn:hover{ filter:brightness(1.05); }
+.btn:active{ background:var(--primary-press); transform:translateY(1px); }
+
+/* Responsive */
+@media (max-width:560px){
+  .btn{ padding:8px 12px; font-size:.85rem; }
+  .name{ font-size:.95rem; }
+}
