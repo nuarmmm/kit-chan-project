@@ -109,6 +109,26 @@ body {
   padding-top:14px;
 }
 
+.actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px
+}
+
+.btn {
+    display: inline-block;
+    background: var(--brand);
+    color: #fff;
+    text-decoration: none;
+    padding: 12px 28px;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(76, 93, 135, .18)
+}
+
+.btn:hover {
+    filter: brightness(1.05)
+}
+
 /* Responsive */
 @media (max-width: 576px){
   .field{ flex-direction:column; }

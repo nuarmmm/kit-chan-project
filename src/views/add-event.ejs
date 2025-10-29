@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>เพิ่มกิจกรรม</title>
+
+  <!-- ฟอนต์ไทยเรียบๆ -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/add-event.css"/>
+</head>
+<body>
+  <!-- แถบด้านบน -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <nav class="topbar__nav">
+        <a href="#">หน้าหลัก</a>
+        <a href="#">การแจ้งเตือน</a>
+      </nav>
+      <div class="avatar" aria-label="โปรไฟล์ผู้ใช้"></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1 class="page-title">ชื่อกิจกรรม</h1>
+
+    <form class="card" action="#" method="post">
+      <!-- กล่องอัปโหลดรูป -->
+      <div class="uploader">
+        <input type="file" id="cover" name="cover" class="uploader__input" accept="image/*">
+        <label for="cover" class="uploader__box">
+          <span class="uploader__plus">+</span>
+        </label>
+      </div>
+
+      <!-- รายละเอียด -->
+      <div class="field">
+        <label for="desc" class="field__label">รายละเอียดกิจกรรม</label>
+        <textarea id="desc" name="description" rows="6" class="field__textarea" placeholder="อธิบายรายละเอียดกิจกรรม..."></textarea>
+      </div>
+
+      <!-- สองช่อง: วันที่จัด / วันปิดรับสมัคร -->
+      <div class="row">
+        <div class="field">
+          <label for="eventDate" class="field__label">วันที่จัดกิจกรรม</label>
+          <input id="eventDate" name="event_date" type="date" class="field__input-underline">
+        </div>
+
+        <div class="field">
+          <label for="closeDate" class="field__label">วันปิดรับสมัคร</label>
+          <input id="closeDate" name="close_date" type="date" class="field__input-underline">
+        </div>
+      </div>
+
+      <!-- สถานที่ -->
+      <div class="row">
+        <div class="field field--grow">
+          <label for="location" class="field__label">สถานที่จัดกิจกรรม</label>
+          <input id="location" name="location" type="text" class="field__input-underline" placeholder="เช่น ห้องประชุม 403 อาคาร A">
+        </div>
+      </div>
+
+      <!-- ปุ่ม -->
+      <div class="actions">
+        <button type="submit" class="btn-primary">เพิ่ม</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

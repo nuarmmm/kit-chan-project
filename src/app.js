@@ -58,6 +58,13 @@ app.get('/staff-apply/:id', (req, res) => {
   res.render('Staff-apply', { eventId });
 });
 
+app.get('/admin-home', (req, res) => res.render('admin-home'));
+
+// Page to create a new event (add event form)
+app.get('/add-event', (req, res) => {
+  res.render('add-event');
+});
+
 app.get('/login', (req, res) => res.render('Login'));
 app.get('/register', (req, res) => res.render('Register'));
 
