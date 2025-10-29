@@ -8,10 +8,27 @@ const { setupSwagger } = require('./swagger');
 const pool = require('./db');
 
 const app = express();
+app.set('trust proxy', true); // รองรับ proxy/ALB บน EB
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*', credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+//
+// ใกล้ๆ ส่วนบน route อื่นๆ ของ app.js
+app.get('/health', (_req, res) => {
+  res.status(200).json({ ok: true, uptime: process.uptime() });
+});
+
+app.get('/ready', async (_req, res) => {
+  try {
+    await pool.query('SELECT 1'); // ใช้ pool จาก './db'
+    res.status(200).json({ db: 'up' });
+  } catch (e) {
+    res.status(503).json({ db: 'down', error: e.message });
+  }
+});
+
+
 // app.js
 app.use('/api/auth', require('./routes/auth.routes'));
 
@@ -42,9 +59,10 @@ app.get("/", (req, res) =>{
 
 app.get('/profile', (req, res) => res.render('profile'));
 
-app.get("/events/:id", async (req, res) =>{
+app.get("/events/:id", async (req, res) => {
+  const base = process.env.API_BASE_URL || `${req.protocol}://${req.get('host')}`;
   try {
-    const apiRes = await fetch(`http://localhost:3000/api/events/${req.params.id}`);
+    const apiRes = await fetch(`${base}/api/events/${req.params.id}`);
     if (!apiRes.ok) return res.status(404).send('ไม่พบกิจกรรม');
     const activity = await apiRes.json();
     res.render('event', { activity });
@@ -52,6 +70,7 @@ app.get("/events/:id", async (req, res) =>{
     res.status(500).send('เกิดข้อผิดพลาด');
   }
 });
+
 
 app.get('/staff-apply/:id', (req, res) => {
   const eventId = req.params.id;
