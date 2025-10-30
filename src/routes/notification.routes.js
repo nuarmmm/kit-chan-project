@@ -38,4 +38,23 @@ router.post('/notifications/mark-all-read', auth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// ลบแจ้งเตือนทีละอัน (เฉพาะของตัวเอง)
+router.delete('/notifications/:id', auth, async (req, res, next) => {
+  try {
+    const row = await Notification.remove(req.user.id, +req.params.id);
+    if (!row) return res.status(404).json({ message: 'Not found' });
+    res.json({ ok: true, id: row.id });
+  } catch (e) { next(e); }
+});
+
+// ลบแจ้งเตือนทั้งหมดของตัวเอง (ใส่ query onlyRead=true ถ้าจะลบเฉพาะที่อ่านแล้ว)
+router.delete('/notifications', auth, async (req, res, next) => {
+  try {
+    const onlyRead = req.query.onlyRead === 'true';
+    const out = await Notification.removeAllForUser(req.user.id, { onlyRead });
+    res.json(out); // { deleted: N }
+  } catch (e) { next(e); }
+});
+
+
 module.exports = router;

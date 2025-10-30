@@ -56,3 +56,34 @@ exports.markAllRead = async (userId) => {
   );
   return { ok: true };
 };
+
+// เพิ่มต่อจากฟังก์ชันที่มีอยู่
+exports.remove = async (userId, id) => {
+  const { rows } = await pool.query(
+    `DELETE FROM notifications
+     WHERE id=$1 AND user_id=$2
+     RETURNING id`,
+    [id, userId]
+  );
+  return rows[0]; // ถ้าไม่เจอจะเป็น undefined
+};
+
+exports.removeAllForUser = async (userId, { onlyRead = false } = {}) => {
+  const cond = onlyRead ? 'AND is_read=TRUE' : '';
+  const result = await pool.query(
+    `DELETE FROM notifications WHERE user_id=$1 ${cond}`,
+    [userId]
+  );
+  return { deleted: result.rowCount };
+};
+
+// (สำหรับ admin ลบแบบ broadcast ด้วย key)
+exports.removeByBroadcastKey = async (broadcastKey) => {
+  const result = await pool.query(
+    `DELETE FROM notifications
+     WHERE data ? 'broadcast_key'
+       AND data->>'broadcast_key' = $1`,
+    [broadcastKey]
+  );
+  return { deleted: result.rowCount };
+};
