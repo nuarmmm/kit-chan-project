@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8" />
+    <title>รายชื่อผู้สมัคร - <%= eventName %>
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin-applicants.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="topbar__links">
+            <a href="/admin/events" class="topbar__link">หน้ากิจกรรม</a>
+            <a href="/notifications" class="topbar__link">การแจ้งเตือน</a>
+            <img src="/img/avatar.jpg" alt="Admin" class="topbar__avatar" />
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">รายชื่อผู้สมัคร <span class="event-name">
+                <%= eventName %>
+            </span></h1>
+
+        <section class="panel">
+            <ul class="applicant-list" id="applicantList" data-api="<%= apiUrl %>" data-event-id="<%= eventId %>">
+                <li class="applicant-item" id="loadingRow"><span class="name">กำลังโหลดรายชื่อ...</span></li>
+            </ul>
+
+            <template id="applicantRowTpl">
+                <li class="applicant-item">
+                    <img class="avatar" src="/img/default-avatar.png" alt="">
+                    <span class="name"></span>
+                    <button class="btn btn-view" type="button">ดูข้อมูลผู้สมัคร</button>
+                </li>
+            </template>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const ul = document.getElementById('applicantList');
+            const tpl = document.getElementById('applicantRowTpl');
+            const api = ul.dataset.api;            // e.g. /api/events/7/staff-applications?page=1&limit=50
+            const eventId = ul.dataset.eventId;
+
+            // ⬇⬇ เพิ่ม cache-buster และปิดแคชของ fetch
+            const url = api + (api.includes('?') ? '&' : '?') + '_=' + Date.now();
+
+            fetch(url, { credentials: 'include', cache: 'no-store' })
+                .then(r => r.json())                 // ตอนนี้จะเป็น 200 เสมอ
+                .then(json => {
+                    const items =
+                        Array.isArray(json?.data) ? json.data :
+                            Array.isArray(json?.items) ? json.items :
+                                Array.isArray(json?.results) ? json.results :
+                                    Array.isArray(json) ? json : [];
+                    render(items);
+                })
+                .catch(err => render([], 'โหลดข้อมูลไม่สำเร็จ: ' + (err.message || '')));
+
+            function render(items, error) {
+                ul.innerHTML = '';
+                if (error) {
+                    const li = document.createElement('li');
+                    li.className = 'applicant-item';
+                    li.innerHTML = `<span class="name">${escapeHtml(error)}</span>`;
+                    return ul.appendChild(li);
+                }
+                if (!items.length) {
+                    const li = document.createElement('li');
+                    li.className = 'applicant-item';
+                    li.innerHTML = `<span class="name">ยังไม่มีผู้สมัคร</span>`;
+                    return ul.appendChild(li);
+                }
+                items.forEach(a => {
+                    const node = tpl.content.firstElementChild.cloneNode(true);
+                    const name = a.full_name || [a.first_name, a.last_name].filter(Boolean).join(' ') || 'ไม่ระบุชื่อ';
+                    node.querySelector('.name').textContent = name;
+                    node.querySelector('.avatar').alt = name;
+                    node.querySelector('.btn-view').addEventListener('click', () => {
+                        location.href = `/admin/events/${encodeURIComponent(eventId)}/applicants/${encodeURIComponent(a.id)}`;
+                    });
+                    ul.appendChild(node);
+                });
+            }
+            function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])) }
+        })();
+    </script>
+</body>
+
+</html>

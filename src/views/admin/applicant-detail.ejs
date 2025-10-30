@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <title>ข้อมูลผู้สมัคร - <%= eventName %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin-applicant-detail.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__links">
+      <a href="/admin/events/<%= eventId %>/applicants" class="topbar__link">← รายชื่อผู้สมัคร</a>
+      <a href="/notifications" class="topbar__link">การแจ้งเตือน</a>
+      <img src="/img/avatar.jpg" alt="Admin" class="topbar__avatar" />
+    </div>
+  </header>
+
+  <main class="container">
+    <h1 class="page-title">ข้อมูลผู้สมัคร</h1>
+    <hr class="divider" />
+
+    <section class="profile-card">
+      <img class="avatar-lg" id="avatar" src="/img/default-avatar.png" alt="avatar" />
+      <div class="fullname" id="full_name">—</div>
+      <div class="muted"><%= eventName %></div>
+    </section>
+
+    <section class="form-view" id="formView" data-api="<%= apiUrl %>">
+      <div class="row"><div class="label">รหัสนักศึกษา:</div><div class="value" id="student_code">—</div></div>
+      <div class="row"><div class="label">คำนำหน้า:</div><div class="value" id="title">—</div></div>
+      <div class="row"><div class="label">ชื่อจริง:</div><div class="value" id="first_name">—</div></div>
+      <div class="row"><div class="label">นามสกุล:</div><div class="value" id="last_name">—</div></div>
+      <div class="row"><div class="label">ชื่อเล่น:</div><div class="value" id="nickname">—</div></div>
+      <div class="row">
+        <div class="label">อีเมล:</div>
+        <div class="value"><a id="email" class="email-link" href="#" target="_blank" rel="noopener">—</a></div>
+      </div>
+      <div class="row"><div class="label">เบอร์โทรศัพท์:</div><div class="value" id="phone">—</div></div>
+
+      <div class="row">
+        <div class="label">สาขา:</div>
+          <div id="major_text" class="muted"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">รุ่น:</div>
+          <div id="cohort_text" class="muted"></div>
+        </div>
+      </div>
+
+      <div class="row"><div class="label">ตำแหน่งที่สมัคร:</div><div class="value" id="position_applied">—</div></div>
+      <div class="row"><div class="label">ประสบการณ์ที่ผ่านมา:</div><div class="value" id="experience">—</div></div>
+      <div class="row"><div class="label">ทำไมถึงอยากทำกิจกรรมนี้:</div><div class="value"><span id="motivation">—</span></div></div>
+      <div class="row"><div class="label">Portfolio:</div><div class="value"><a id="portfolio_url" href="#" target="_blank" rel="noopener">—</a></div></div>
+      <div class="row"><div class="label">Resume:</div><div class="value"><a id="resume_s3_url" href="#" target="_blank" rel="noopener">—</a></div></div>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+    const apiUrl = document.getElementById('formView').dataset.api;
+    fetch(apiUrl, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+      .then(json => render(json.data || json))
+      .catch(e => alert('โหลดข้อมูลไม่สำเร็จ: ' + e.message));
+
+    function render(a) {
+      const full = a.full_name || [a.first_name, a.last_name].filter(Boolean).join(' ');
+      setText('full_name', full || '-');
+
+      setText('student_code', a.student_code || '-');
+      setText('title', a.title || '-');
+      setText('first_name', a.first_name || '-');
+      setText('last_name', a.last_name || '-');
+      setText('nickname', a.nickname || '-');
+      setEmail('email', a.email);
+      setText('phone', a.phone || '-');
+
+      checkRadio('major', a.major);
+      setText('major_text', a.major || '');
+      checkRadio('cohort', String(a.cohort));
+      setText('cohort_text', a.cohort || '');
+
+      setText('position_applied', a.position_applied || '-');
+      setText('experience', a.experience || '-');
+      setText('motivation', a.motivation || '-');
+
+      setLink('portfolio_url', a.portfolio_url);
+      setLink('resume_s3_url', a.resume_s3_url);
+    }
+
+    function setText(id, v){ const el = document.getElementById(id); if(el) el.textContent = v; }
+    function setLink(id, href){
+      const el = document.getElementById(id); if(!el) return;
+      if (href){ el.href = href; el.textContent = href; }
+      else { el.textContent = '—'; el.removeAttribute('href'); }
+    }
+    function setEmail(id, email){
+      const el = document.getElementById(id); if(!el) return;
+      if (email){ el.href = `mailto:${email}`; el.textContent = email; }
+      else { el.textContent = '—'; el.removeAttribute('href'); }
+    }
+    function checkRadio(name, val){
+      document.querySelectorAll(`input[type="radio"][name="${name}"]`)
+        .forEach(n => n.checked = String(n.value) === String(val));
+    }
+  })();
+  </script>
+</body>
+</html>

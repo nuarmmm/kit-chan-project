@@ -59,6 +59,32 @@ router.post('/events/:eventId/staff-applications', async (req, res, next) => {
 
 /**
  * @swagger
+ * /events/{eventId}/staff-applications/{id}:
+ *   get:
+ *     tags: [StaffApplications]
+ *     summary: Get one staff application in an event
+ *     parameters:
+ *       - { name: eventId, in: path, required: true, schema: { type: integer } }
+ *       - { name: id,      in: path, required: true, schema: { type: integer } }
+ *     responses:
+ *       200: { description: OK }
+ *       404: { description: Not found }
+ */
+router.get('/events/:eventId/staff-applications/:id', async (req, res, next) => {
+  try {
+    const eventId = +req.params.eventId;
+    const id = +req.params.id;
+
+    const row = await StaffApp.findById(id);
+    if (!row || row.event_id !== eventId) {
+      return res.status(404).json({ error: 'not_found' });
+    }
+    res.set('Cache-Control', 'no-store');
+    res.json({ data: row }); // หน้า EJS รองรับทั้ง {data:row} และ row ตรงๆ
+  } catch (err) { next(err); }
+});
+/**
+ * @swagger
  * /staff-applications/{id}:
  *   get:
  *     tags: [StaffApplications]
