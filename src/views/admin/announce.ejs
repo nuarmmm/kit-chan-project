@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ประกาศถึงผู้ใช้ทั้งหมด</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:24px;background:#f9fafb}
+    .card{max-width:720px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
+    .hd{padding:18px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+    .bd{padding:20px}
+    .row{margin-bottom:14px}
+    label{display:block;font-weight:600;margin-bottom:6px}
+    input[type=text],textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px}
+    textarea{min-height:120px;resize:vertical}
+    .actions{display:flex;gap:8px;margin-top:8px}
+    .btn{padding:10px 14px;border-radius:10px;border:1px solid #d1d5db;background:#111827;color:#fff;cursor:pointer}
+    .muted{color:#6b7280;font-size:14px}
+    .ok{background:#ecfdf5;border:1px solid #34d399;color:#065f46;padding:10px 12px;border-radius:10px;margin-bottom:14px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="hd">
+      <h2>ประกาศถึงผู้ใช้ทั้งหมด</h2>
+      <div class="muted">เข้าสู่ระบบเป็น: <%= user?.email || 'admin' %></div>
+    </div>
+    <div class="bd">
+      <% if (ok) { %><div class="ok">ส่งประกาศเรียบร้อย!</div><% } %>
+      <form method="POST" action="/admin/notifications/broadcast">
+        <div class="row">
+          <label>หัวข้อ (จำเป็น)</label>
+          <input type="text" name="title" placeholder="เช่น กิจกรรมใหม่ล่าสุดมาแล้ว!" required />
+        </div>
+        <div class="row">
+          <label>ข้อความ</label>
+          <textarea name="body" placeholder="รายละเอียดเพิ่มเติม / วันเวลา / เงื่อนไข"></textarea>
+        </div>
+        <div class="row">
+          <label>ลิงก์ (ไม่บังคับ)</label>
+          <input type="text" name="link" placeholder="/events/123 หรือ https://..." />
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn">ประกาศตอนนี้</button>
+        </div>
+        <p class="muted">ประกาศนี้จะถูกส่งเป็น Notification ไปยังผู้ใช้ role: <b>user</b> ทุกคน</p>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

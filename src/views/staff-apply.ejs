@@ -7,14 +7,27 @@
     <title>
         <%= title || 'สมัครสตาฟ' %>
     </title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="/staff-apply.css">
-        <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&family=Kanit:wght@400;700&display=swap" rel="stylesheet">
-        <style>
-            body, .formgrid, .navline, .ribbon, .btn, input, label, .radio, .radio-col, h1, h2, h3, small {
-                font-family: 'Prompt', 'Kanit', sans-serif !important;
-            }
-        </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/staff-apply.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&family=Kanit:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body,
+        .formgrid,
+        .navline,
+        .ribbon,
+        .btn,
+        input,
+        label,
+        .radio,
+        .radio-col,
+        h1,
+        h2,
+        h3,
+        small {
+            font-family: 'Prompt', 'Kanit', sans-serif !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -28,14 +41,21 @@
         </div>
     </div>
 
+    <!-- เฮดเดอร์กิจกรรม (ได้จาก SSR) -->
     <header class="ribbon">
         <div class="ribbon__inner">
-            <h1>ITCamp21</h1>
-            <small>💎❄️ ITCAMP 21 | The Glacial Horizon ❄️💎</small>
+            <h1 id="campTitle">
+                <%= event.title %>
+            </h1>
+            <small id="campSubtitle">
+                <%= event.subtitle || event.theme || '' %>
+            </small>
         </div>
     </header>
 
-    <main class="page" id="pageRoot" data-event-id="<%= eventId %>" data-api-base="<%= apiBase || '/api' %>">>
+    <!-- เก็บค่าไว้ให้ JS ใช้ยิง API -->
+    <main class="page" id="pageRoot" data-event-id="<%= eventId %>" data-api-base="<%= apiBase || '/api' %>">
+
         <form id="applyForm" class="formgrid" novalidate>
             <div class="field">
                 <label for="student_code">รหัสนักศึกษา</label>
@@ -121,6 +141,18 @@
         const form = document.getElementById('applyForm');
         const btn = document.getElementById('submitBtn');
         const msg = document.getElementById('msg');
+
+        // ===== เติมหัวข้อค่ายด้วย API ของกิจกรรม (รองรับกรณีไม่ได้ SSR event) =====
+        (async () => {
+            try {
+                const r = await fetch(`${API_BASE}/events/${EVENT_ID}`);
+                if (!r.ok) return;
+                const ev = await r.json();
+                if (ev?.title) document.getElementById('campTitle').textContent = ev.title;
+                if (ev?.subtitle || ev?.theme) document.getElementById('campSubtitle').textContent = ev.subtitle || ev.theme;
+                document.title = `สมัครสตาฟ — ${ev?.title || 'กิจกรรม'}`;
+            } catch { }
+        })();
 
         function flash(ok, text) {
             msg.className = 'full alert ' + (ok ? 'alert-success' : 'alert-danger');

@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db'); // pg Pool
+const Notify = require('../services/notify.service');   // ⬅️ เพิ่ม
+
 
 /**
  * @swagger
@@ -107,7 +109,7 @@ const db = require('../db'); // pg Pool
 function buildOrder(sort = 'start_at') {
   if (!sort) return 'start_at ASC';
   const desc = String(sort).trim().startsWith('-');
-  const raw  = String(sort).trim().replace(/^-/, '');
+  const raw = String(sort).trim().replace(/^-/, '');
   const map = {
     start_at: 'start_at',
     end_at: 'end_at',
@@ -162,7 +164,7 @@ router.get('/', async (req, res, next) => {
     };
 
     const fromX = expandDate(from, 'from');
-    const toX   = expandDate(to,   'to');
+    const toX = expandDate(to, 'to');
 
     const where = [];
     const params = [];
@@ -181,11 +183,11 @@ router.get('/', async (req, res, next) => {
 
     // กรองช่วงวันที่จัด
     if (fromX) add(`e.start_at >= ?::timestamptz`, fromX);
-    if (toX)   add(`e.start_at <= ?::timestamptz`, toX);
+    if (toX) add(`e.start_at <= ?::timestamptz`, toX);
 
     // กรองช่วงรับสมัคร
     if (reg_from) add(`e.reg_open_at >= ?::timestamptz`, reg_from);
-    if (reg_to)   add(`e.reg_close_at <= ?::timestamptz`, reg_to);
+    if (reg_to) add(`e.reg_close_at <= ?::timestamptz`, reg_to);
 
     if (published !== undefined) add(`e.is_published = ?`, String(published) === 'true');
 
@@ -195,13 +197,13 @@ router.get('/', async (req, res, next) => {
     const totalRes = await db.query(`SELECT COUNT(*)::int AS cnt FROM events e ${whereSql}`, params);
     const total = totalRes.rows[0].cnt;
 
-    const pageNum  = Math.max(1, Number(page) || 1);
+    const pageNum = Math.max(1, Number(page) || 1);
     const limitNum = Math.min(100, Math.max(1, Number(limit) || 10));
-    const offset   = (pageNum - 1) * limitNum;
+    const offset = (pageNum - 1) * limitNum;
     const orderSql = buildOrder(sort);
 
     const listParams = [...params, limitNum, offset];
-    const limitIdx  = params.length + 1;
+    const limitIdx = params.length + 1;
     const offsetIdx = params.length + 2;
 
     const sql = `
@@ -323,6 +325,17 @@ router.post('/', async (req, res, next) => {
     );
 
     await client.query('COMMIT');
+    // ถ้าอีเวนต์นี้ publish แล้ว ให้ประกาศถึงผู้ใช้ทั้งหมด
+    if (full?.is_published) {
+      await Notify.pushToAllUsers(db, {
+        type: 'new_event_published',
+        title: `กิจกรรมใหม่: ${full.title}`,
+        body: full.start_at ? `เริ่ม ${new Date(full.start_at).toLocaleString()}` : '',
+        link: `/events/${full.id}`,            // หน้าเว็บของเธอ; ถ้าใช้หน้า API เปลี่ยนเป็น /api/events/${full.id}
+        data: { eventId: full.id }
+      });
+    }
+
     res.status(201).json(full);
   } catch (err) {
     await client.query('ROLLBACK');
@@ -335,8 +348,8 @@ router.post('/', async (req, res, next) => {
 // ===== UPDATE (patch fields; ถ้า body มี images[] จะ replace ทั้งชุด) =====
 router.put('/:id', async (req, res, next) => {
   const allowed = [
-    'title','description','start_at','end_at','reg_open_at','reg_close_at',
-    'organizer','registration_url','location','capacity','is_published','image_url'
+    'title', 'description', 'start_at', 'end_at', 'reg_open_at', 'reg_close_at',
+    'organizer', 'registration_url', 'location', 'capacity', 'is_published', 'image_url'
   ];
   const fields = [];
   const vals = [];
