@@ -1,26 +1,49 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>กิจกรรมคณะ IT</title>
   <link rel="stylesheet" href="/css/style.css">
   <script src="/js/categories.js" defer></script>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&family=Kanit:wght@400;700&display=swap"
+    rel="stylesheet">
 </head>
+
 <body>
 
   <!-- Header -->
   <header class="navbar">
     <div class="logo">กิจจัง</div>
-      <nav>
-        <a href="#">หน้าแรก</a>
-        <a href="#">การแจ้งเตือน</a>
-      </nav>
+    <nav>
+      <a href="#">หน้าแรก</a>
+      <a class="btn" href="/admin/announce">ประกาศถึงผู้ใช้</a>
+      <!-- Notification bell -->
+      <div class="notif-box" style="position:relative;">
+        <button id="notif-bell" class="btn" type="button">
+          🔔
+          <span id="notif-badge" style="display:none;position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;
+             background:#e11d48;color:#fff;font-size:12px;line-height:18px;text-align:center;padding:0 4px;"></span>
+        </button>
+
+        <div id="notif-dropdown" style="display:none;position:absolute;right:0;top:36px;width:320px;max-height:360px;overflow:auto;
+              background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);">
+          <div
+            style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;">
+            <strong>การแจ้งเตือน</strong>
+            <button id="notif-markall" class="btn" style="font-size:12px;">อ่านทั้งหมด</button>
+          </div>
+          <ul id="notif-list" style="list-style:none;margin:0;padding:0;"></ul>
+          <div id="notif-empty" style="padding:12px;display:none;color:#6b7280;">— ไม่มีการแจ้งเตือน —</div>
+        </div>
+      </div>
+
+    </nav>
     <div class="avatar" id="profileAvatar" aria-label="profile"></div>
-    </div> 
+    </div>
   </header>
-  
+
 
   <!-- Hero Section -->
   <section class="hero">
@@ -47,13 +70,13 @@
   </section>
 
   <!-- ช่องค้นหา -->
-<div class="search-bar">
-  <input id="searchInput" type="text" placeholder="ค้นหากิจกรรม...">
-</div>
+  <div class="search-bar">
+    <input id="searchInput" type="text" placeholder="ค้นหากิจกรรม...">
+  </div>
 
-<!-- สคริปต์ -->
-<script src="/js/categories.js" defer></script>
-<script src="/js/search.js" defer></script>
+  <!-- สคริปต์ -->
+  <script src="/js/categories.js" defer></script>
+  <script src="/js/search.js" defer></script>
 
 
   <!-- Activity Section -->
@@ -87,25 +110,42 @@
   <div id="camp-content" class="camp-grid"></div>
 
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // ถ้ามี token แสดงว่า login แล้ว ให้ซ่อนปุ่ม
-    if (localStorage.getItem('token')) {
-      const loginBtn = document.getElementById('loginBtn');
-      const registerBtn = document.getElementById('registerBtn');
-      if (loginBtn) loginBtn.style.display = 'none';
-      if (registerBtn) registerBtn.style.display = 'none';
-    }
-  });
+    document.addEventListener('DOMContentLoaded', () => {
+      // ถ้ามี token แสดงว่า login แล้ว ให้ซ่อนปุ่ม
+      if (localStorage.getItem('token')) {
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (registerBtn) registerBtn.style.display = 'none';
+      }
+    });
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const avatar = document.getElementById('profileAvatar');
-    if (avatar) {
-      avatar.style.cursor = 'pointer';
-      avatar.addEventListener('click', () => {
-        window.location.href = '/profile';
-      });
-    }
-  });
+    document.addEventListener('DOMContentLoaded', () => {
+      const avatar = document.getElementById('profileAvatar');
+      if (avatar) {
+        avatar.style.cursor = 'pointer';
+        avatar.addEventListener('click', () => {
+          window.location.href = '/profile';
+        });
+      }
+    });
   </script>
+
+  <script src="/js/notifications.js"></script>
+
+  <script>
+  (function () {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!u || u.role !== 'admin') {
+        const btn = document.querySelector('a[href="/admin/announce"]');
+        if (btn) btn.style.display = 'none';
+      }
+    } catch (_) {}
+  })();
+</script>
+
+
 </body>
+
 </html>

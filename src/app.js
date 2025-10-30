@@ -3,16 +3,23 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 
 const { setupSwagger } = require('./swagger');
 const pool = require('./db');
 
 const app = express();
+app.use(cookieParser());
 app.set('trust proxy', true); // รองรับ proxy/ALB บน EB
+app.use(require('./routes/notification.routes'));
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*', credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+app.use(require('./routes/admin.broadcast.web.routes')); // ⬅️ เพิ่ม
+app.use(require('./routes/admin.broadcast.web.routes'));
+
 //
 // ใกล้ๆ ส่วนบน route อื่นๆ ของ app.js
 app.get('/health', (_req, res) => {

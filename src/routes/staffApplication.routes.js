@@ -1,6 +1,9 @@
 // src/routes/staffApplication.routes.js
 const router = require('express').Router();
 const StaffApp = require('../models/staffApplication.model');
+const pool = require('../db');                    // ⬅️ เพิ่ม
+const Notify = require('../services/notify.service'); // ⬅️ เพิ่ม (ไฟล์ service ตามที่ให้ไว้ก่อนหน้า)
+
 
 /**
  * @swagger
@@ -53,6 +56,20 @@ router.post('/events/:eventId/staff-applications', async (req, res, next) => {
     const { eventId } = req.params;
     const userId = req.user?.id ?? null; // ถ้ามี JWT
     const row = await StaffApp.create(+eventId, req.body, userId);
+
+    // ➕ ใหม่ (ใส่ต่อจากบรรทัดข้างบน)
+    const { rows: evRows } = await pool.query('SELECT id, title FROM events WHERE id=$1', [+eventId]);
+    const ev = evRows[0];
+
+    await Notify.pushToAdmins(pool, { // ใช้เวอร์ชัน pushToAdmins(pool, payload)
+      type: 'staff_application_submitted',
+      title: `มีใบสมัครสตาฟใหม่`,
+      body: `${req.user?.first_name || 'ผู้สมัคร'} สมัครกิจกรรม ${ev?.title || `#${eventId}`}`,
+      link: `/admin/events/${eventId}/applicants`,
+      data: { eventId: +eventId, applicantId: row.id }
+    });
+
+
     res.status(201).json(row);
   } catch (err) { next(err); }
 });
@@ -114,8 +131,33 @@ router.get('/staff-applications/:id', async (req, res, next) => {
 });
 
 router.patch('/staff-applications/:id', async (req, res, next) => {
-  try { res.json(await StaffApp.update(+req.params.id, req.body)); } catch (err) { next(err); }
+  try {
+    const id = +req.params.id;
+
+    // ดึงข้อมูลเดิมก่อนอัปเดต
+    const before = await StaffApp.findById(id);
+
+    // อัปเดต
+    const updated = await StaffApp.update(id, req.body);
+
+    // ถ้ามีการส่ง status มา และสถานะเปลี่ยนจริง → แจ้งผู้สมัคร
+    if (before && 'status' in req.body && before.status !== updated.status) {
+      const { rows: evRows } = await pool.query('SELECT id, title FROM events WHERE id=$1', [updated.event_id]);
+      const ev = evRows[0];
+
+      await Notify.pushToUser(updated.user_id, {
+        type: 'staff_status_changed',
+        title: `สถานะใบสมัครกิจกรรม ${ev?.title || `#${updated.event_id}`}`,
+        body: `สถานะของคุณ: ${updated.status}`,   // เช่น approved | rejected | pending
+        link: `/profile`,
+        data: { eventId: updated.event_id, status: updated.status, applicationId: updated.id }
+      });
+    }
+
+    res.json(updated);
+  } catch (err) { next(err); }
 });
+
 
 router.delete('/staff-applications/:id', async (req, res, next) => {
   try { await StaffApp.remove(+req.params.id); res.status(204).end(); } catch (err) { next(err); }

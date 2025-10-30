@@ -60,6 +60,11 @@ exports.login = async (req, res, next) => {
         if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
 
         const token = signToken({ id: row.id, email: row.email, role: row.role });
+        res.cookie('token', token, {
+            httpOnly: true,
+            sameSite: 'lax',
+            // secure: true, // เปิดเมื่อรัน https จริง เช่นผ่าน EB/CloudFront
+        });
         return res.json({ token });
     } catch (e) {
         return next(e);
