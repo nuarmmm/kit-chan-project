@@ -1,70 +1,171 @@
 <!DOCTYPE html>
 <html lang="th">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>เพิ่มกิจกรรม</title>
 
-  <!-- ฟอนต์ไทยเรียบๆ -->
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/add-event.css"/>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เพิ่มกิจกรรม</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/add-event.css" />
 </head>
+
 <body>
-  <!-- แถบด้านบน -->
-  <header class="topbar">
-    <div class="topbar__inner">
-      <nav class="topbar__nav">
-        <a href="#">หน้าหลัก</a>
-        <a href="#">การแจ้งเตือน</a>
-      </nav>
-      <div class="avatar" aria-label="โปรไฟล์ผู้ใช้"></div>
-    </div>
+  <header class="navbar">
+    <div class="logo" onclick="location.href='/'">กิจจัง</div>
+    <nav>
+      <a href="/">หน้าหลัก</a>
+      <a href="/notifications">การแจ้งเตือน</a>
+    </nav>
+    <div class="avatar" id="profileAvatar" aria-label="profile"></div>
   </header>
 
   <main class="container">
     <h1 class="page-title">ชื่อกิจกรรม</h1>
 
-    <form class="card" action="#" method="post">
-      <!-- กล่องอัปโหลดรูป -->
-      <div class="uploader">
-        <input type="file" id="cover" name="cover" class="uploader__input" accept="image/*">
-        <label for="cover" class="uploader__box">
-          <span class="uploader__plus">+</span>
+    <form id="eventForm" class="form" enctype="multipart/form-data">
+      <!-- อัปโหลดรูปปก + พรีวิว -->
+      <div class="cover-uploader">
+        <label for="cover" class="dropzone" id="coverDrop">
+          <img id="coverPreview" alt="" class="hidden" />
+          <span id="coverPlaceholder">+</span>
         </label>
+        <input type="file" id="cover" name="cover" accept="image/*" hidden />
       </div>
 
       <!-- รายละเอียด -->
-      <div class="field">
-        <label for="desc" class="field__label">รายละเอียดกิจกรรม</label>
-        <textarea id="desc" name="description" rows="6" class="field__textarea" placeholder="อธิบายรายละเอียดกิจกรรม..."></textarea>
+      <label class="field">
+        <span>รายละเอียดกิจกรรม</span>
+        <textarea name="description" rows="6" placeholder="รายละเอียด..."></textarea>
+      </label>
+
+      <div class="grid-2">
+        <label class="field">
+          <span>วัน/เวลาเริ่ม</span>
+          <input type="datetime-local" name="start_at" />
+        </label>
+        <label class="field">
+          <span>วัน/เวลาจบ</span>
+          <input type="datetime-local" name="end_at" />
+        </label>
+        <label class="field">
+          <span>เปิดรับสมัคร</span>
+          <input type="datetime-local" name="reg_open_at" />
+        </label>
+        <label class="field">
+          <span>ปิดรับสมัคร</span>
+          <input type="datetime-local" name="reg_close_at" />
+        </label>
       </div>
 
-      <!-- สองช่อง: วันที่จัด / วันปิดรับสมัคร -->
-      <div class="row">
-        <div class="field">
-          <label for="eventDate" class="field__label">วันที่จัดกิจกรรม</label>
-          <input id="eventDate" name="event_date" type="date" class="field__input-underline">
-        </div>
-
-        <div class="field">
-          <label for="closeDate" class="field__label">วันปิดรับสมัคร</label>
-          <input id="closeDate" name="close_date" type="date" class="field__input-underline">
-        </div>
+      <div class="grid-2">
+        <label class="field">
+          <span>สถานที่จัดกิจกรรม</span>
+          <input type="text" name="location" placeholder="เช่น อาคาร X ห้อง Y" />
+        </label>
+        <label class="field">
+          <span>ผู้จัด</span>
+          <input type="text" name="organizer" placeholder="เช่น ชมรม/หน่วยงาน" />
+        </label>
       </div>
 
-      <!-- สถานที่ -->
-      <div class="row">
-        <div class="field field--grow">
-          <label for="location" class="field__label">สถานที่จัดกิจกรรม</label>
-          <input id="location" name="location" type="text" class="field__input-underline" placeholder="เช่น ห้องประชุม 403 อาคาร A">
-        </div>
+      <div class="grid-2">
+        <label class="field">
+          <span>ลิงก์สมัคร</span>
+          <input type="url" name="registration_url" placeholder="https://..." />
+        </label>
+        <label class="field">
+          <span>จำนวนที่รับ</span>
+          <input type="number" name="capacity" min="0" placeholder="เช่น 120" />
+        </label>
       </div>
 
-      <!-- ปุ่ม -->
-      <div class="actions">
-        <button type="submit" class="btn-primary">เพิ่ม</button>
+      <!-- แกลเลอรี (ออปชัน) -->
+      <details class="gallery">
+        <summary>เพิ่มรูปแกลเลอรี (ออปชัน)</summary>
+        <input type="file" name="images" id="images" accept="image/*" multiple />
+        <div id="galleryPreview" class="thumbs"></div>
+      </details>
+
+      <!-- ชื่อ และเผยแพร่ -->
+      <div class="grid-2">
+        <label class="field">
+          <span>ชื่อกิจกรรม</span>
+          <input type="text" name="title" required placeholder="เช่น ITCamp21" />
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="is_published" value="true" checked />
+          <span>เผยแพร่เลย</span>
+        </label>
       </div>
+
+      <button type="submit" class="btn primary" id="submitBtn">เพิ่ม</button>
+      <p id="formMsg" class="msg"></p>
     </form>
   </main>
+
+  <script>
+      const f = document.getElementById('eventForm');
+      const cover = document.getElementById('cover');
+      const drop = document.getElementById('coverDrop');
+      const prev = document.getElementById('coverPreview');
+      const ph = document.getElementById('coverPlaceholder');
+      const imgs = document.getElementById('images');
+      const thumbs = document.getElementById('galleryPreview');
+      const msg = document.getElementById('formMsg');
+      const btn = document.getElementById('submitBtn');
+
+      // พรีวิวรูปปก
+      drop.addEventListener('click', () => cover.click());
+      cover.addEventListener('change', () => {
+        if (cover.files && cover.files[0]) {
+          prev.src = URL.createObjectURL(cover.files[0]);
+          prev.onload = () => URL.revokeObjectURL(prev.src);
+          prev.classList.remove('hidden'); ph.style.display = 'none';
+        }
+      });
+
+      // พรีวิวแกลเลอรี
+      imgs?.addEventListener('change', () => {
+        thumbs.innerHTML = '';
+        [...imgs.files].forEach(file => {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          img.onload = () => URL.revokeObjectURL(img.src);
+          thumbs.appendChild(img);
+        });
+      });
+
+      // helper แปลง datetime-local → ISO
+      function toISO(v) { return v ? new Date(v).toISOString() : ''; }
+
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.textContent = ''; btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+
+        try {
+          const fd = new FormData(f);
+          // แก้ชื่อฟิลด์เวลาให้เป็น ISO (ตามสคีมาใน Swagger/DB)
+          ['start_at', 'end_at', 'reg_open_at', 'reg_close_at'].forEach(k => {
+            const el = f.querySelector(`[name="${k}"]`);
+            if (el) { fd.set(k, toISO(el.value)); }
+          });
+          // เช็กบูลีน
+          if (!fd.get('is_published')) fd.set('is_published', 'false');
+
+          const res = await fetch('/api/admin/events', { method: 'POST', body: fd });
+          if (!res.ok) throw new Error('สร้างกิจกรรมไม่สำเร็จ');
+          // เสร็จ → กลับหน้าแรก (ผู้ใช้จะเห็นเพราะ is_published=true)
+          location.href = '/';
+        } catch (err) {
+          msg.textContent = err.message || 'เกิดข้อผิดพลาด';
+        } finally {
+          btn.disabled = false; btn.textContent = 'เพิ่ม';
+        }
+      });
+
+  </script>
 </body>
+
 </html>

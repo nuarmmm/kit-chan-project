@@ -24,5 +24,4 @@ function requireRole(...roles) {
   };
 }
 
-module.exports = auth;                 // default export = auth
-module.exports.requireRole = requireRole;
+module.exports = auth, requireRole;                 // default export = auth

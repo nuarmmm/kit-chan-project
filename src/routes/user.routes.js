@@ -1,9 +1,8 @@
 // src/routes/user.routes.js
 const router = require('express').Router();
 const Users = require('../models/user.model');
-const auth = require('../middlewares/auth.middleware');
-const { requireRole } = require('../middlewares/auth.middleware');
-
+// const auth = require('../middlewares/auth.middleware');
+const { requireAuth, requireRole } = require('../middlewares/auth.middleware');
 /**
  * @swagger
  * tags:
@@ -24,7 +23,7 @@ const { requireRole } = require('../middlewares/auth.middleware');
  *       401: { description: Unauthorized }
  *       404: { description: Not found }
  */
-router.get('/me', auth, async (req, res, next) => {
+router.get('/me', requireAuth, async (req, res, next) => {
   try {
     const row = await Users.findById(req.user.id);
     if (!row) return res.status(404).json({ message: 'Not found' });
@@ -70,7 +69,7 @@ router.get('/me', auth, async (req, res, next) => {
  *       409:
  *         description: Email exists
  */
-router.get('/', auth, requireRole('admin'), async (_req, res, next) => {
+router.get('/',requireAuth,requireRole('admin'),async (_req, res, next) => {
   try {
     res.json(await Users.findAll());
   } catch (e) { next(e); }

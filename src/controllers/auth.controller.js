@@ -4,6 +4,7 @@ const User = require('../models/user.model');
 
 // ---------- helpers ----------
 const normEmail = (e) => String(e || '').trim().toLowerCase();
+const isEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e || '');
 
 function signToken(payload) {
     if (!process.env.JWT_SECRET) throw new Error('JWT secret is not configured');

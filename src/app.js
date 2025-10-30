@@ -3,6 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
+const methodOverride = require('method-override');
 
 const { setupSwagger } = require('./swagger');
 const pool = require('./db');
@@ -28,6 +29,8 @@ app.use('/api/categories', require('./routes/category.routes'));
 // ✅ เพิ่มบรรทัดนี้ (mount API สมัครสตาฟ)
 app.use('/api', require('./routes/staffApplication.routes'));
 app.use(require('./routes/staffApplication.web.routes'));
+app.use(methodOverride('_method'));
+
 
 
 // ----- Swagger UI -----
