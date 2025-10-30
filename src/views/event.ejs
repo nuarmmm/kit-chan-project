@@ -62,12 +62,14 @@
       </div>
 
       <div class="actions">
-        <a class="btn" href="/events/<%= activity.id %>/staff-apply">สมัคร</a>
+        <a class="btn" href="/events/<%= activity.id %>/staff-apply" id="applyBtn">สมัคร</a>
+        <a class="btn" href="/events/<%= activity.id %>/staff-apply" style="display: none;" id="editBtn">แก้ไขข้อมูล</a>
+        <a class="btn" href="/events/<%= activity.id %>/staff-apply" style="display: none;" id="applicantsBtn">รายชื่อผู้สมัคร</a>
       </div>
     </section>
   </main>
 
-  <script>
+  <!-- <script>
     const express = require('express');
     const router = express.Router();
     const EventModel = require('../models/event.model'); // หรือเรียก API
@@ -81,6 +83,20 @@
     });
 
     module.exports = router;
+  </script> -->
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log(JSON.parse(localStorage.getItem('user')));
+    if (JSON.parse(localStorage.getItem('user'))?.role == 'admin') {
+      document.getElementById('editBtn').style.display = 'inline-block';
+      document.getElementById('applicantsBtn').style.display = 'inline-block';
+      document.getElementById('applyBtn').style.display = 'none';
+    } else {
+      document.getElementById('editBtn').style.display = 'none';
+      document.getElementById('applicantsBtn').style.display = 'none';
+      document.getElementById('applyBtn').style.display = 'inline-block';
+    }
+  });
   </script>
 </body>
 </html>

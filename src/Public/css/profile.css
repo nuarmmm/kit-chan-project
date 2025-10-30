@@ -14,7 +14,7 @@ body{
   margin:0;
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, Segoe UI, Arial, sans-serif;
+  font-family: "Prompt", sans-serif;
 }
 
 body {

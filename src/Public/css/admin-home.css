@@ -263,33 +263,48 @@ body {
 
 /* Add-card (add new event) */
 .card.add-card {
-  background: #f3f4f6;
-  border: 2px dashed #e5e7eb;
+  background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+  border: 2px dashed #cbd5e0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 12px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
+
+.card.add-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  border-color: #4c5d87;
+  /* background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); */
+}
+
 .card.add-card .plus {
-  font-size: 48px;
+  margin-top: 80px;
+  font-size: 90px;
   line-height: 1;
-  color: #6b7280;
-  width: 72px;
-  height: 72px;
-  display: grid;
-  place-items: center;
-  background: rgba(255,255,255,0.6);
-  border-radius: 12px;
-  box-shadow: none;
+  color: #8892b0;
+  font-weight: 200;
+  transition: all 0.3s ease;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
+/* .card.add-card:hover .plus {
+  color: #4c5d87;
+  transform: rotate(90deg) scale(1.1);
+} */
+
 .card.add-card p {
   margin: 0;
   font-weight: 600;
-  color: #374151;
+  font-size: 16px;
+  color: #475569;
+  transition: color 0.3s ease;
 }
-.card.add-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+.card.add-card:hover p {
+  color: #1e293b;
 }
+
+

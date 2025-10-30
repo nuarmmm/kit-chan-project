@@ -22,13 +22,13 @@
   </header>
 
   <main class="container">
-    <h1 class="page-title">ชื่อกิจกรรม</h1>
+    <input id="title" name="title" type="text" class="field__input-underline" placeholder="ชื่อกิจกรรม"/>
 
-    <form class="card" action="#" method="post">
+    <form id="addEventForm" class="card" action="/api/events" method="post" enctype="multipart/form-data">
       <!-- กล่องอัปโหลดรูป -->
       <div class="uploader">
-        <input type="file" id="cover" name="cover" class="uploader__input" accept="image/*">
-        <label for="cover" class="uploader__box">
+        <input type="file" id="cover" name="cover" class="uploader__input" accept="image/*" hidden>
+        <label for="cover" class="uploader__box" id="coverBox">
           <span class="uploader__plus">+</span>
         </label>
       </div>
@@ -64,7 +64,86 @@
       <div class="actions">
         <button type="submit" class="btn-primary">เพิ่ม</button>
       </div>
+      <div id="formMsg"></div>
     </form>
   </main>
+    <script>
+      // พรีวิวรูป (เดิม)
+      const coverInput = document.getElementById('cover');
+      const coverBox = document.getElementById('coverBox');
+      coverInput.addEventListener('change', () => {
+        const file = coverInput.files?.[0];
+        if (!file) {
+          coverBox.style.backgroundImage = '';
+          coverBox.innerHTML = '<span class="uploader__plus">+</span>';
+          return;
+        }
+        const url = URL.createObjectURL(file);
+        coverBox.style.backgroundImage = `url("${url}")`;
+        coverBox.innerHTML = '';
+      });
+  
+      // ส่งข้อมูลเป็น JSON ไปยัง /api/events
+      const form = document.getElementById('addEventForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const formMsg = document.getElementById('formMsg');
+  
+      function toISODate(dateStr) {
+        if (!dateStr) return null;
+        // ใช้เที่ยงวันกัน timezone เพี้ยน
+        return new Date(`${dateStr}T12:00:00`).toISOString();
+      }
+  
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        formMsg.textContent = '';
+        formMsg.className = '';
+        submitBtn.disabled = true;
+  
+        try {
+          const title = document.getElementById('title').value.trim();
+          const description = document.getElementById('desc').value.trim();
+          const eventDate = document.getElementById('eventDate').value;  // YYYY-MM-DD
+          const closeDate = document.getElementById('closeDate').value;  // YYYY-MM-DD
+          const location = document.getElementById('location').value.trim();
+  
+          if (!title) throw new Error('กรอกชื่อกิจกรรมก่อนน้า');
+          if (!eventDate) throw new Error('กรอกวันที่จัดกิจกรรม');
+  
+          // แมปฟิลด์ให้ตรง API (ดู POST /api/events ใน src/routes/event.routes.js)
+          const payload = {
+            title,
+            description: description || null,
+            start_at: toISODate(eventDate),
+            reg_close_at: toISODate(closeDate),
+            location: location || null,
+            is_published: true,              // ตั้งค่าเริ่มต้นให้เผยแพร่ได้เลย (แก้ได้)
+            image_url: null,                  // ถ้ามี URL รูปปกให้ใส่ที่นี่
+            images: []                        // ถ้ามีหลายรูปเป็น URL array
+          };
+  
+          const res = await fetch('/api/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+  
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.message || `สร้างกิจกรรมไม่สำเร็จ (HTTP ${res.status})`);
+  
+          formMsg.textContent = 'สร้างกิจกรรมสำเร็จ!';
+          formMsg.className = 'success';
+  
+          // ไปหน้ารายละเอียดกิจกรรมที่เพิ่งสร้าง
+          if (data.id) window.location.href = `/events/${data.id}`;
+          else window.location.href = `/admin-home`;
+        } catch (err) {
+          formMsg.textContent = err.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่';
+          formMsg.className = 'error';
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    </script>
 </body>
 </html>

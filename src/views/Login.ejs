@@ -35,6 +35,19 @@
   </div>
 
   <script>
+    // ถ้ามี token อยู่แล้ว → เด้งตาม role ทันที
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const me = await fetch('/api/auth/me', {
+          headers: { Authorization: 'Bearer ' + token }
+        }).then(r => r.ok ? r.json() : null);
+        if (me?.user?.role === 'admin') return location.href = '/admin-home';
+        if (me?.user) return location.href = '/';
+      } catch {}
+    });
+
     const $ = s => document.querySelector(s);
     const showErr = m => { const a = $('#loginAlert'); a.textContent = m; a.style.display = 'block'; };
     const hideErr = () => { $('#loginAlert').style.display = 'none'; };
@@ -53,7 +66,6 @@
       btn.disabled = true; btn.textContent = 'กำลังเข้าสู่ระบบ...';
 
       try {
-        //ใช้ /api/auth/login
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -66,18 +78,25 @@
           throw new Error(msg);
         }
 
-        // ได้ token แล้ว เก็บไว้
+        // เก็บ token
         localStorage.setItem('token', data.token);
 
-        // (ทางเลือก) ดึงโปรไฟล์มาเก็บใน localStorage
+        // ดึงโปรไฟล์เพื่อตรวจ role แล้ว redirect
         try {
           const me = await fetch('/api/auth/me', {
             headers: { Authorization: 'Bearer ' + data.token }
           }).then(r => r.ok ? r.json() : null);
-          if (me?.user) localStorage.setItem('user', JSON.stringify(me.user));
-        } catch { }
 
-        // ไปหน้าแรกหรือหน้าที่ต้องการ
+          if (me?.user) {
+            localStorage.setItem('user', JSON.stringify(me.user));
+            if (me.user.role === 'admin') {
+              return location.href = '/admin-home';
+            }
+            return location.href = '/';
+          }
+        } catch {}
+
+        // fallback
         location.href = '/';
       } catch (err) {
         showErr(err.message || 'เกิดข้อผิดพลาด');

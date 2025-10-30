@@ -30,6 +30,7 @@
     "dotenv": "^17.2.2",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
     "pg": "^8.16.3",
@@ -42,5 +43,4 @@
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4"
   }
-  
 }

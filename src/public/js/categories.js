@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
           activitiesGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">ไม่พบกิจกรรม</p>';
         } else {
           activities.forEach(activity => {
+            console.log(activity.name);
             const card = document.createElement('div');
             card.className = 'card';
             card.onclick = () => location.href = `/events/${activity.id || ''}`;

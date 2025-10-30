@@ -13,13 +13,26 @@ function normalizeItems(data) {
   return [];
 }
 
+function currentUser() {
+  try { return JSON.parse(localStorage.getItem('user') || 'null'); }
+  catch { return null; }
+}
+
 async function load(params = {}) {
   const qs = new URLSearchParams(params).toString();
-  const res = await fetch(`${API_BASE}?${qs}`);
+  const res = await fetch(`/api/events?${qs}`);
   const data = await res.json();
-  const items = normalizeItems(data);
+  const items = Array.isArray(data) ? data : (data.items || data.data || []);
+
+  const user = currentUser();
+  console.log('Current user:', user);
+  if (user?.role === 'admin') {
+    items.unshift({ id: -1, title: 'เพิ่มกิจกรรม', image_url: 'https://placehold.co/600x400' });
+  }
+
   renderCards(items);
 }
+
 
 function renderCards(items) {
   if (!grid) return;
@@ -31,6 +44,14 @@ function renderCards(items) {
     const id    = it.id ?? it.event_id ?? '';
     const title = it.title ?? it.name ?? '(ไม่มีชื่อกิจกรรม)';
     const thumb = (it.images && it.images[0]) || it.image_url || 'https://placehold.co/600x400';
+    if (id === -1) {
+      return `
+      <div class="card add-card" onclick="location.href='/add-event'">
+        <div class="plus">+</div>
+        <p>${title}</p>
+      </div>
+      `;
+    }
     return `
       <div class="card" onclick="location.href='/events/${id}'">
         <img src="${thumb}" alt="">
