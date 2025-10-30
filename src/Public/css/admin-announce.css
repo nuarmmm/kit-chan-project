@@ -1,0 +1,96 @@
+/* Admin Announce Page Styles - flat, consistent with site */
+
+body.admin-page {
+  font-family: "Prompt", sans-serif;
+  background: #f9fafb;
+  color: #111827;
+  margin: 0;
+}
+
+.container {
+  max-width: 960px;
+  margin: 24px auto 40px;
+  padding: 0 16px;
+}
+
+.admin-card {
+  max-width: 760px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  overflow: hidden;
+}
+
+.admin-hd {
+  padding: 18px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.admin-hd h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.admin-bd { padding: 20px; }
+
+.muted { color: #6b7280; font-size: 14px; }
+
+.ok {
+  background: #ecfdf5;
+  border: 1px solid #34d399;
+  color: #065f46;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+.admin-form .row { margin-bottom: 14px; }
+.admin-form label { display: block; font-weight: 600; margin-bottom: 6px; }
+
+.admin-form input[type="text"],
+.admin-form textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font: inherit;
+  outline: none;
+  background: #fff;
+  box-sizing: border-box; /* prevent overflow so it doesn't hug the right edge */
+}
+.admin-form textarea { min-height: 130px; resize: vertical; }
+.admin-form input:focus, .admin-form textarea:focus {
+  border-color: #9ca3af;
+  box-shadow: 0 0 0 3px rgba(156,163,175,.2);
+}
+
+.admin-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+/* Button base scoped to admin page to avoid global override */
+.admin-page .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+}
+.admin-page .btn:hover { filter: brightness(0.98); }
+
+/* Primary flat button (match site tone) */
+.admin-page .btn.primary {
+  background: #2d3e8b;
+  color: #fff;
+  border-color: #2d3e8b;
+}
+.admin-page .btn.primary:hover { filter: brightness(1.05); }

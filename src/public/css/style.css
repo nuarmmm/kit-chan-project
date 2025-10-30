@@ -1,3 +1,142 @@
+/* Notifications/Bell tidy */
+
+.notif-box {
+  position: relative;
+  margin-left: 0;
+}
+.notif-bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.notif-bell:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
+.bell-icon { font-size: 18px; }
+.notif-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: #e11d48;
+  color: #fff;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+  padding: 0 4px;
+  box-shadow: 0 2px 6px rgba(225,29,72,.5);
+}
+
+.notif-dropdown {
+  position: absolute;
+  right: 0;
+  top: 44px;
+  width: min(90vw, 340px);
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 14px 32px rgba(0,0,0,.14);
+  z-index: 30;
+  padding: 6px 0;
+  transform: translateY(6px) scale(0.98);
+  opacity: 0;
+  transition: opacity .15s ease, transform .2s ease;
+}
+.notif-dropdown.open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+.notif-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 14px;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-left: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+  transform: rotate(45deg);
+}
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  border-radius: 12px 12px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.notif-markall {
+  font-size: 12px;
+  padding: 6px 8px;
+  background: #f3f4f6;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+}
+/* Make mark-all and clear-all look the same */
+.notif-header .btn,
+.notif-markall,
+.notif-clearall {
+  font-size: 12px;
+  padding: 8px 12px;
+  background: #fff;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+  font: inherit;
+  font-weight: 400; /* not bold */
+  transition: background .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+.notif-header .btn:hover,
+.notif-markall:hover,
+.notif-clearall:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+.notif-header .btn:first-of-type { margin-left: auto; }
+.notif-clearall { margin-left: 8px; }
+
+/* Ensure delete buttons and other actions inherit site font */
+.notif-del { font: inherit; }
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 320px;
+  overflow: auto;
+}
+.notif-list li {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 10px;
+  align-items: start;
+}
+.notif-list li:hover { background: #fafafa; }
+.notif-empty { padding: 16px; color: #6b7280; text-align: center; }
+.notif-list::-webkit-scrollbar { width: 10px; }
+.notif-list::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 8px; }
+.notif-list::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
 body {
   font-family: "Prompt", sans-serif;
   margin: 0;
@@ -14,6 +153,13 @@ body {
   align-items: center;
   justify-content: space-between;
   height: 64px;
+}
+
+/* Make nav inline with spacing so bell sits next to announce */
+.navbar nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .navbar nav a {

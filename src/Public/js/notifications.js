@@ -1,3 +1,4 @@
+
 (function () {
     const bell = document.getElementById('notif-bell');
     const badge = document.getElementById('notif-badge');
@@ -15,10 +16,20 @@
     }
 
     function toggleDD() {
-        dd.style.display = dd.style.display === 'none' || !dd.style.display ? 'block' : 'none';
+        const willOpen = dd.style.display === 'none' || !dd.style.display;
+        dd.style.display = willOpen ? 'block' : 'none';
+        dd.classList.toggle('open', willOpen);
+        bell.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
     }
     bell.addEventListener('click', toggleDD);
-    document.addEventListener('click', (e) => { if (!dd.contains(e.target) && e.target !== bell) dd.style.display = 'none'; });
+    // Close when clicking outside dropdown and outside bell (including bell's children)
+    document.addEventListener('click', (e) => {
+        if (!dd.contains(e.target) && !bell.contains(e.target)) {
+            dd.style.display = 'none';
+            dd.classList.remove('open');
+            bell.setAttribute('aria-expanded', 'false');
+        }
+    });
 
     function render(list) {
         listEl.innerHTML = '';
@@ -26,40 +37,48 @@
         emptyEl.style.display = 'none';
         for (const n of list) {
             const li = document.createElement('li');
-            li.style.padding = '10px 12px';
-            li.style.borderBottom = '1px solid #f3f4f6';
-            li.style.background = n.is_read ? '#fff' : '#f9fafb';
+            li.className = 'notif-item' + (n.is_read ? '' : ' unread');
+
+            // optional dot/icon column
+            const dot = document.createElement('div');
+            dot.className = 'notif-dot';
+            li.appendChild(dot);
+
+            const content = document.createElement('div');
+            content.className = 'notif-content';
 
             const a = document.createElement('a');
             a.href = n.link || '#';
             a.textContent = n.title || '(ไม่มีชื่อเรื่อง)';
-            a.style.display = 'block';
-            a.style.fontWeight = n.is_read ? 'normal' : '600';
-            a.style.marginBottom = '4px';
+            a.className = 'notif-title' + (n.is_read ? '' : ' unread');
 
             const p = document.createElement('div');
             p.textContent = n.body || '';
-            p.style.fontSize = '12px';
-            p.style.color = '#6b7280';
+            p.className = 'notif-body';
 
             a.addEventListener('click', async () => {
                 try { await fetch(withToken(`/notifications/${n.id}/read`), { method: 'PATCH', credentials: 'include' }); }
                 catch { }
             });
 
-            li.appendChild(a);
-            if (n.body) li.appendChild(p);
-            // ปุ่มลบรายแถว
+            content.appendChild(a);
+            if (n.body) content.appendChild(p);
+            li.appendChild(content);
+
+            // action column
+            const actions = document.createElement('div');
+            actions.className = 'notif-actions';
             const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'btn notif-del';
             del.textContent = 'ลบ';
-            del.style.fontSize = '12px';
-            del.style.marginTop = '6px';
             del.addEventListener('click', async (ev) => {
                 ev.preventDefault();
                 await fetch(withToken(`/notifications/${n.id}`), { method: 'DELETE', credentials: 'include' });
                 await refreshBadge(); await loadList();
             });
-            li.appendChild(del);
+            actions.appendChild(del);
+            li.appendChild(actions);
 
             listEl.appendChild(li);
         }
@@ -88,8 +107,9 @@
     if (!clearAllBtn) {
         clearAllBtn = document.createElement('button');
         clearAllBtn.id = 'notif-clearall';
+        clearAllBtn.type = 'button';
+        clearAllBtn.className = 'btn notif-clearall';
         clearAllBtn.textContent = 'ลบทั้งหมด';
-        clearAllBtn.style.marginLeft = '8px';
         markAllBtn?.parentNode?.appendChild(clearAllBtn);
     }
     clearAllBtn.addEventListener('click', async () => {

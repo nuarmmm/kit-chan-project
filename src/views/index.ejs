@@ -18,30 +18,26 @@
     <div class="logo">กิจจัง</div>
     <nav>
       <a href="#">หน้าแรก</a>
-      <a class="btn" href="/admin/announce">ประกาศถึงผู้ใช้</a>
+      <a class="btn nav-announce" href="/admin/announce">ประกาศถึงผู้ใช้</a>
       <!-- Notification bell -->
-      <div class="notif-box" style="position:relative;">
-        <button id="notif-bell" class="btn" type="button">
-          🔔
-          <span id="notif-badge" style="display:none;position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;
-             background:#e11d48;color:#fff;font-size:12px;line-height:18px;text-align:center;padding:0 4px;"></span>
+      <div class="notif-box">
+        <button id="notif-bell" class="notif-bell" type="button">
+          <span class="bell-icon">🔔</span>
+          <span id="notif-badge" class="notif-badge" style="display:none;"></span>
         </button>
 
-        <div id="notif-dropdown" style="display:none;position:absolute;right:0;top:36px;width:320px;max-height:360px;overflow:auto;
-              background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);">
-          <div
-            style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;">
+        <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
+          <div class="notif-header">
             <strong>การแจ้งเตือน</strong>
-            <button id="notif-markall" class="btn" style="font-size:12px;">อ่านทั้งหมด</button>
+            <button id="notif-markall" class="btn notif-markall">อ่านทั้งหมด</button>
           </div>
-          <ul id="notif-list" style="list-style:none;margin:0;padding:0;"></ul>
-          <div id="notif-empty" style="padding:12px;display:none;color:#6b7280;">— ไม่มีการแจ้งเตือน —</div>
+          <ul id="notif-list" class="notif-list"></ul>
+          <div id="notif-empty" class="notif-empty" style="display:none;">— ไม่มีการแจ้งเตือน —</div>
         </div>
       </div>
 
     </nav>
     <div class="avatar" id="profileAvatar" aria-label="profile"></div>
-    </div>
   </header>
 
 
