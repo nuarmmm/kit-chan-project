@@ -10,9 +10,9 @@ const activitiesMock = {
   "บำเพ็ญประโยชน์": [
     { id: 10, name: "IT3K", image_url: "https://image-activity.s3.us-east-1.amazonaws.com/IT3K/3k1.jpg" }
   ],
-  "อื่นๆ": [
-    { id: 11, name: "Pre-programming", image_url: "https://image-activity.s3.us-east-1.amazonaws.com/prepro/p1.jpg" }
-  ]
+  // "อื่นๆ": [
+  //   { id: 11, name: "Pre-programming", image_url: "https://image-activity.s3.us-east-1.amazonaws.com/prepro/p1.jpg" }
+  // ]
 };
 
 module.exports = activitiesMock;
