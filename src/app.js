@@ -106,7 +106,8 @@ app.get('/staff-apply/:id', (req, res) => {
   res.render('Staff-apply', { eventId });
 });
 
-app.get('/admin-home', (req, res) => res.render('admin-home'));
+app.get('/admin-home', (_req, res) => res.redirect('/'));
+
 
 // Page to create a new event (add event form)
 app.get('/add-event', (req, res) => {
