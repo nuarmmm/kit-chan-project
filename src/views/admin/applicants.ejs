@@ -16,11 +16,9 @@
 <body>
     <header class="topbar">
         <div class="topbar__links">
-            <a href="/admin/events" class="topbar__link">หน้ากิจกรรม</a>
-                        <img
-                            class="topbar__avatar"
-                            alt="Admin"
-                            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239aa3af'><circle cx='12' cy='8' r='4'/><rect x='5' y='14' width='14' height='6' rx='3'/></svg>"/>
+            <a href="/events/<%= eventId %>" class="topbar__link">หน้ากิจกรรม</a>
+            <img class="topbar__avatar" alt="Admin"
+                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239aa3af'><circle cx='12' cy='8' r='4'/><rect x='5' y='14' width='14' height='6' rx='3'/></svg>" />
         </div>
     </header>
 
@@ -36,10 +34,8 @@
 
             <template id="applicantRowTpl">
                 <li class="applicant-item">
-                    <img
-                      class="avatar"
-                      alt=""
-                      src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239aa3af'><circle cx='12' cy='8' r='4'/><rect x='5' y='14' width='14' height='6' rx='3'/></svg>"/>
+                    <img class="avatar" alt=""
+                        src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239aa3af'><circle cx='12' cy='8' r='4'/><rect x='5' y='14' width='14' height='6' rx='3'/></svg>" />
                     <span class="name"></span>
                     <button class="btn btn-view" type="button">ดูข้อมูลผู้สมัคร</button>
                 </li>

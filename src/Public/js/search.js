@@ -1,5 +1,7 @@
 // Public/js/search.js (robust version)
 const API_BASE = '/api/events';
+// Data-URI SVG (question mark) as a safe, inline fallback image
+const QUESTION_FALLBACK = "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='120' fill='%239ca3af'%3E%3F%3C/text%3E%3C/svg%3E";
 
 // เผื่อไม่ได้ใส่ id ก็จับจาก .search-bar input ได้
 const grid  = document.getElementById('activities-grid');
@@ -43,7 +45,7 @@ function renderCards(items) {
   grid.innerHTML = items.map(it => {
     const id    = it.id ?? it.event_id ?? '';
     const title = it.title ?? it.name ?? '(ไม่มีชื่อกิจกรรม)';
-    const thumb = (it.images && it.images[0]) || it.image_url || 'https://placehold.co/600x400';
+    const thumb = (it.images && it.images[0]) || it.image_url || it.cover_url || QUESTION_FALLBACK;
     if (id === -1) {
       return `
       <div class="card add-card" onclick="location.href='/add-event'">
@@ -54,7 +56,7 @@ function renderCards(items) {
     }
     return `
       <div class="card" onclick="location.href='/events/${id}'">
-        <img src="${thumb}" alt="">
+        <img src="${thumb}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${QUESTION_FALLBACK}';">
         <p>${title}</p>
       </div>
     `;

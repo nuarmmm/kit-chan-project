@@ -207,6 +207,10 @@ body {
   border: 1px solid #e5e7eb;
   margin-right: 20px;
 }
+.topbar__avatar{
+  width:36px; height:36px; border-radius:50%;
+  object-fit:cover; border:1px solid var(--border);
+}
 
 /* Hero Section */
 .hero {

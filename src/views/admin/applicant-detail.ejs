@@ -12,7 +12,11 @@
     <div class="topbar__links">
       <a href="/admin/events/<%= eventId %>/applicants" class="topbar__link">← รายชื่อผู้สมัคร</a>
       <a href="/notifications" class="topbar__link">การแจ้งเตือน</a>
-      <img src="/img/avatar.jpg" alt="Admin" class="topbar__avatar" />
+      <div class="topbar__avatar avatar-icon" role="img" aria-label="ผู้ดูแลระบบ">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1c0 .552.448 1 1 1h14c.552 0 1-.448 1-1v-1c0-2.761-3.582-5-8-5z"/>
+        </svg>
+      </div>
     </div>
   </header>
 
@@ -21,7 +25,11 @@
     <hr class="divider" />
 
     <section class="profile-card">
-      <img class="avatar-lg" id="avatar" src="/img/default-avatar.png" alt="avatar" />
+      <div class="avatar-lg avatar-icon" id="avatar" role="img" aria-label="โปรไฟล์">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1c0 .552.448 1 1 1h14c.552 0 1-.448 1-1v-1c0-2.761-3.582-5-8-5z"/>
+        </svg>
+      </div>
       <div class="fullname" id="full_name">—</div>
       <div class="muted"><%= eventName %></div>
     </section>
@@ -40,14 +48,12 @@
 
       <div class="row">
         <div class="label">สาขา:</div>
-          <div id="major_text" class="muted"></div>
-        </div>
+        <div class="value" id="major_text">—</div>
       </div>
 
       <div class="row">
         <div class="label">รุ่น:</div>
-          <div id="cohort_text" class="muted"></div>
-        </div>
+        <div class="value" id="cohort_text">—</div>
       </div>
 
       <div class="row"><div class="label">ตำแหน่งที่สมัคร:</div><div class="value" id="position_applied">—</div></div>
@@ -67,8 +73,9 @@
       .catch(e => alert('โหลดข้อมูลไม่สำเร็จ: ' + e.message));
 
     function render(a) {
-      const full = a.full_name || [a.first_name, a.last_name].filter(Boolean).join(' ');
-      setText('full_name', full || '-');
+  const full = a.full_name || [a.first_name, a.last_name].filter(Boolean).join(' ');
+  setText('full_name', full || '-');
+  setAvatarAria(full || 'โปรไฟล์');
 
       setText('student_code', a.student_code || '-');
       setText('title', a.title || '-');
@@ -92,6 +99,7 @@
     }
 
     function setText(id, v){ const el = document.getElementById(id); if(el) el.textContent = v; }
+  function setAvatarAria(label){ const el = document.getElementById('avatar'); if(el) el.setAttribute('aria-label', label); }
     function setLink(id, href){
       const el = document.getElementById(id); if(!el) return;
       if (href){ el.href = href; el.textContent = href; }

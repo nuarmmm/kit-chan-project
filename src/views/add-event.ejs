@@ -38,11 +38,24 @@
         <textarea id="desc" name="description" rows="6" class="field__textarea" placeholder="อธิบายรายละเอียดกิจกรรม..."></textarea>
       </div>
 
-      <!-- สองช่อง: วันที่จัด / วันปิดรับสมัคร -->
+      <!-- สองช่อง: วันที่เริ่มกิจกรรม / วันสิ้นสุดกิจกรรม -->
       <div class="row">
         <div class="field">
           <label for="eventDate" class="field__label">วันที่จัดกิจกรรม</label>
           <input id="eventDate" name="event_date" type="date" class="field__input-underline">
+        </div>
+
+        <div class="field">
+          <label for="eventEndDate" class="field__label">วันสิ้นสุดกิจกรรม</label>
+          <input id="eventEndDate" name="event_end_date" type="date" class="field__input-underline">
+        </div>
+      </div>
+
+      <!-- สองช่อง: วันเปิดรับสมัคร / วันปิดรับสมัคร -->
+      <div class="row">
+        <div class="field">
+          <label for="regOpenDate" class="field__label">วันเปิดรับสมัคร</label>
+          <input id="regOpenDate" name="reg_open_date" type="date" class="field__input-underline">
         </div>
 
         <div class="field">
@@ -101,8 +114,10 @@
         try {
           const title = document.getElementById('title').value.trim();
           const description = document.getElementById('desc').value.trim();
-          const eventDate = document.getElementById('eventDate').value;   // YYYY-MM-DD
-          const closeDate = document.getElementById('closeDate').value;   // YYYY-MM-DD
+          const eventDate = document.getElementById('eventDate').value;        // YYYY-MM-DD
+          const eventEndDate = document.getElementById('eventEndDate').value;  // YYYY-MM-DD
+          const regOpenDate = document.getElementById('regOpenDate').value;    // YYYY-MM-DD
+          const closeDate = document.getElementById('closeDate').value;        // YYYY-MM-DD
           const location = document.getElementById('location').value.trim();
 
           if (!title) throw new Error('กรอกชื่อกิจกรรมก่อน');
@@ -113,6 +128,8 @@
             title,
             description: description || null,
             start_at: toISODate(eventDate),
+            end_at: toISODate(eventEndDate),
+            reg_open_at: toISODate(regOpenDate),
             reg_close_at: toISODate(closeDate),
             location: location || null,
             is_published: true,
