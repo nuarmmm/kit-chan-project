@@ -8,90 +8,93 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link rel="stylesheet" href="/login.css">
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&family=Kanit:wght@400;700&display=swap"
+    rel="stylesheet">
 </head>
-<body>
-</head>
 
 <body>
-  <div class="wrapper">
-    <h1>เข้าสู่ระบบ</h1>
+  </head>
 
-    <form id="loginForm">
-      <div class="form-group mb-3">
-        <label for="email" class="visually-hidden">อีเมล</label>
-        <input id="email" name="email" type="email" class="form-control" placeholder="อีเมล" required>
-      </div>
-      <div class="form-group mb-3">
-        <label for="password" class="visually-hidden">รหัสผ่าน</label>
-        <input id="password" name="password" type="password" class="form-control" placeholder="รหัสผ่าน" required>
-      </div>
+  <body>
+    <div class="wrapper">
+      <h1>เข้าสู่ระบบ</h1>
 
-      <div id="loginAlert" class="small text-danger mb-2" style="display:none;"></div>
-      <button id="loginBtn" class="btn btn-primary w-100" type="submit">เข้าสู่ระบบ</button>
-    </form>
+      <form id="loginForm">
+        <div class="form-group mb-3">
+          <label for="email" class="visually-hidden">อีเมล</label>
+          <input id="email" name="email" type="email" class="form-control" placeholder="อีเมล" required>
+        </div>
+        <div class="form-group mb-3">
+          <label for="password" class="visually-hidden">รหัสผ่าน</label>
+          <input id="password" name="password" type="password" class="form-control" placeholder="รหัสผ่าน" required>
+        </div>
 
-    <p class="mt-3">ยังไม่มีบัญชีใช่หรือไม่? <a href="/register">ลงทะเบียนที่นี่</a></p>
-  </div>
+        <div id="loginAlert" class="small text-danger mb-2" style="display:none;"></div>
+        <button id="loginBtn" class="btn btn-primary w-100" type="submit">เข้าสู่ระบบ</button>
+      </form>
 
-  <script>
-    const $ = s => document.querySelector(s);
-    const showErr = m => { const a = $('#loginAlert'); a.textContent = m; a.style.display = 'block'; };
-    const hideErr = () => { $('#loginAlert').style.display = 'none'; };
+      <p class="mt-3">ยังไม่มีบัญชีใช่หรือไม่? <a href="/register">ลงทะเบียนที่นี่</a></p>
+    </div>
 
-    const form = $('#loginForm');
-    const btn = $('#loginBtn');
+    <script>
+      const $ = s => document.querySelector(s);
+      const showErr = m => { const a = $('#loginAlert'); a.textContent = m; a.style.display = 'block'; };
+      const hideErr = () => { $('#loginAlert').style.display = 'none'; };
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideErr();
+      const form = $('#loginForm');
+      const btn = $('#loginBtn');
 
-      const email = $('#email').value.trim();
-      const password = $('#password').value;
-      if (!email || !password) return showErr('กรอกอีเมลและรหัสผ่านให้ครบก่อนน้า');
+      let inflight = false; // กันกดซ้ำ
 
-      btn.disabled = true; btn.textContent = 'กำลังเข้าสู่ระบบ...';
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (inflight) return;         // กันอ่าน response เดิมซ้ำ
+        inflight = true;
 
-      try {
-        //ใช้ /api/auth/login
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
+        hideErr();
+        const email = $('#email').value.trim();
+        const password = $('#password').value;
+        if (!email || !password) { showErr('กรอกอีเมลและรหัสผ่านให้ครบ'); inflight = false; return; }
 
-        const data = await res.json().catch(() => null);
-        if (!res.ok) {
-          const msg = (data && (data.message || data.error)) || `เข้าสู่ระบบล้มเหลว (HTTP ${res.status})`;
-          throw new Error(msg);
-        }
+        btn.disabled = true; btn.textContent = 'กำลังเข้าสู่ระบบ...';
 
-        // ได้ token แล้ว เก็บไว้
-        localStorage.setItem('token', data.token);
-
-        // (ทางเลือก) ดึงโปรไฟล์มาเก็บใน localStorage
         try {
-          const me = await fetch('/api/auth/me', {
-            headers: { Authorization: 'Bearer ' + data.token }
-          }).then(r => r.ok ? r.json() : null);
-          if (me?.user) localStorage.setItem('user', JSON.stringify(me.user));
-        } catch { }
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
 
-        // ไปหน้าแรกหรือหน้าที่ต้องการ
-        location.href = '/';
-      } catch (err) {
-        showErr(err.message || 'เกิดข้อผิดพลาด');
-      } finally {
-        btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
-      }
-    });
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"
-    integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y"
-    crossorigin="anonymous"></script>
-</body>
+          // ✅ อ่านบอดี้ครั้งเดียว ด้วย text() แล้วค่อยพยายาม parse
+          const text = await res.text();
+          let data = null; try { data = text ? JSON.parse(text) : null; } catch { }
+
+          if (!res.ok) {
+            throw new Error(data?.message || data?.error || `เข้าสู่ระบบล้มเหลว (HTTP ${res.status})`);
+          }
+
+          const token = data?.token;
+          if (!token) throw new Error('ไม่พบ token จากเซิร์ฟเวอร์');
+
+          const secure = location.protocol === 'https:' ? '; Secure' : '';
+          document.cookie = `access_token=${token}; Path=/; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}${secure}`;
+          localStorage.setItem('token', token);
+
+          location.href = '/admin-home';
+        } catch (err) {
+          showErr(err.message || 'เข้าสู่ระบบไม่สำเร็จ');
+        } finally {
+          inflight = false;
+          btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
+        }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+      crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"
+      integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y"
+      crossorigin="anonymous"></script>
+  </body>
 
 </html>

@@ -3,6 +3,8 @@ const router = require('express').Router();
 const Users = require('../models/user.model');
 // const auth = require('../middlewares/auth.middleware');
 const { requireAuth, requireRole } = require('../middlewares/auth.middleware');
+const auth = requireAuth;
+
 /**
  * @swagger
  * tags:
@@ -17,17 +19,22 @@ const { requireAuth, requireRole } = require('../middlewares/auth.middleware');
  *     tags: [Users]
  *     summary: Get current user's profile (self)
  *     security:
- *       - bearerAuth: []   # ต้องตรงกับชื่อใน swagger.js
+ *       - bearerAuth: []
  *     responses:
- *       200: { description: OK }
- *       401: { description: Unauthorized }
- *       404: { description: Not found }
+ *       200:
+ *         description: OK
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Not found
  */
+
 router.get('/me', requireAuth, async (req, res, next) => {
   try {
     const row = await Users.findById(req.user.id);
     if (!row) return res.status(404).json({ message: 'Not found' });
-    res.json(row); // ไม่คืน password/password_hash
+    const { password, password_hash, ...safe } = row || {};
+    res.json(safe);
   } catch (e) { next(e); }
 });
 
@@ -42,6 +49,7 @@ router.get('/me', requireAuth, async (req, res, next) => {
  *     responses:
  *       200:
  *         description: OK
+ *
  *   post:
  *     tags: [Users]
  *     summary: Create user (admin only)
@@ -54,13 +62,28 @@ router.get('/me', requireAuth, async (req, res, next) => {
  *         application/json:
  *           schema:
  *             type: object
- *             required: [first_name, last_name, email, password]
+ *             required:
+ *               - first_name
+ *               - last_name
+ *               - email
+ *               - password
  *             properties:
- *               first_name: { type: string, example: Alice }
- *               last_name:  { type: string, example: Doe }
- *               email:      { type: string, example: alice@example.com }
- *               password:   { type: string, example: secret123 }
- *               role:       { type: string, example: user, description: Admin only }
+ *               first_name:
+ *                 type: string
+ *                 example: Alice
+ *               last_name:
+ *                 type: string
+ *                 example: Doe
+ *               email:
+ *                 type: string
+ *                 example: alice@example.com
+ *               password:
+ *                 type: string
+ *                 example: secret123
+ *               role:
+ *                 type: string
+ *                 example: user
+ *                 description: Admin only
  *     responses:
  *       201:
  *         description: Created
@@ -69,26 +92,29 @@ router.get('/me', requireAuth, async (req, res, next) => {
  *       409:
  *         description: Email exists
  */
-router.get('/',requireAuth,requireRole('admin'),async (_req, res, next) => {
+
+router.get('/', requireAuth, requireRole('admin'), async (_req, res, next) => {
   try {
     res.json(await Users.findAll());
   } catch (e) { next(e); }
 });
 
-router.post('/', auth, requireRole('admin'), async (req, res, next) => {
+router.post('/', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
     const { first_name, last_name, email, password, role = 'user' } = req.body || {};
     if (!first_name || !last_name || !email || !password) {
       return res.status(400).json({ message: 'first_name, last_name, email, password required' });
     }
     const user = await Users.create({ first_name, last_name, email, password, role });
-    res.status(201).json({ user });
+    const { password: p, password_hash: ph, ...safe } = user || {};
+    res.status(201).json({ user: safe });
   } catch (e) {
-    if (e.code === 'EMAIL_EXISTS') return res.status(409).json({ message: 'Email already exists' });
+    if (e.code === 'EMAIL_EXISTS' || e.code === '23505') {
+      return res.status(409).json({ message: 'Email already exists' });
+    }
     next(e);
   }
 });
-
 /**
  * @swagger
  * /users/{id}:
@@ -149,7 +175,7 @@ router.post('/', auth, requireRole('admin'), async (req, res, next) => {
  *       204: { description: No Content }
  *       403: { description: Forbidden }
  */
-router.get('/:id', auth, async (req, res, next) => {
+router.get('/:id', requireAuth, async (req, res, next) => {
   try {
     const id = Number(req.params.id);
     if (req.user.role !== 'admin' && req.user.id !== id) {
@@ -157,11 +183,12 @@ router.get('/:id', auth, async (req, res, next) => {
     }
     const row = await Users.findById(id);
     if (!row) return res.status(404).json({ message: 'Not found' });
-    res.json(row);
+    const { password, password_hash, ...safe } = row || {};
+    res.json(safe);
   } catch (e) { next(e); }
 });
 
-router.patch('/:id', auth, async (req, res, next) => {
+router.patch('/:id', requireAuth, async (req, res, next) => {
   try {
     const id = Number(req.params.id);
     // เฉพาะ admin เท่านั้นที่แก้ role ได้
@@ -178,7 +205,7 @@ router.patch('/:id', auth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-router.delete('/:id', auth, requireRole('admin'), async (req, res, next) => {
+router.delete('/:id', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
     await Users.remove(Number(req.params.id));
     res.status(204).end();

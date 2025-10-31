@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>กิจกรรมคณะ IT</title>
-  <link rel="stylesheet" href="/css/home.css" />
+  <link rel="stylesheet" href="/css/admin-home.css" />
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 
@@ -58,8 +58,9 @@
     </div>
   </section>
 
+
   <script>
-    window.__USER__ = <% - JSON.stringify(user || null).replace(/</g, '\\u003c') %>;
+    window.__USER__ = <% - userJSON %>;
   </script>
 
   <script>
@@ -68,37 +69,36 @@
       const input = document.getElementById('searchInput');
       const btn = document.getElementById('searchBtn');
 
-      // ซ่อนปุ่มเข้าสู่ระบบ/สมัคร หากมี token ใน localStorage
-      document.addEventListener('DOMContentLoaded', () => {
-        if (localStorage.getItem('token')) {
-          document.getElementById('loginBtn')?.remove();
-          document.getElementById('registerBtn')?.remove();
-        }
-      });
+      // // ซ่อนปุ่มเข้าสู่ระบบ/สมัคร หากมี token
+      // if (localStorage.getItem('token')) {
+      //   document.getElementById('loginBtn')?.remove();
+      //   document.getElementById('registerBtn')?.remove();
+      // }
 
       async function load(q = '') {
         const url = new URL('/api/events', location.origin);
-        url.searchParams.set('is_published', 'true');
+        url.searchParams.set('is_published', 'true'); // ตรงกับแบ็กเอนด์
         if (q) url.searchParams.set('q', q);
 
         const res = await fetch(url);
-        const data = await res.json();      // data เป็น array
-        data.forEach(ev => { /* render card */ });
+        const payload = await res.json();
 
+        // รองรับทั้งสองรูปแบบ: { items: [...] } หรือ [...]
+        const rows = Array.isArray(payload) ? payload : (payload.items || []);
 
-        // เคลียร์การ์ดเดิม แต่เก็บ "add-card" ของ admin ไว้ถ้ามี
+        // เก็บ add-card ของ admin ไว้ถ้ามี
         const addCard = grid.querySelector('.add-card');
         grid.innerHTML = '';
         if (addCard) grid.appendChild(addCard);
 
-        data.forEach(ev => {
+        rows.forEach(ev => {
           const card = document.createElement('div');
           card.className = 'card';
           card.onclick = () => location.href = `/events/${ev.id}`;
           card.innerHTML = `
-        <img src="${ev.image_url || 'https://placehold.co/600x350'}" alt="">
-        <p>${ev.title || 'Untitled'}</p>
-      `;
+          <img src="${ev.image_url || 'https://placehold.co/600x350'}" alt="">
+          <p>${ev.title || 'Untitled'}</p>
+        `;
           grid.appendChild(card);
         });
       }
@@ -107,7 +107,8 @@
       btn.addEventListener('click', () => load(input.value.trim()));
       input.addEventListener('keyup', e => { if (e.key === 'Enter') load(input.value.trim()); });
 
-      load(); // initial
+      // เริ่มต้น
+      load();
     })();
   </script>
 </body>

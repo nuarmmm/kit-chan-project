@@ -12,13 +12,13 @@
 
   <!-- Header -->
   <header class="navbar">
-    <div class="logo">กิจจัง</div>
-      <nav>
-        <a href="#">หน้าแรก</a>
-        <a href="#">การแจ้งเตือน</a>
-      </nav>
-    <div class="avatar" id="profileAvatar" aria-label="profile"></div>
-  </header>
+  <div class="logo" onclick="location.href='/'">กิจจัง</div>
+  <nav>
+    <a href="/">หน้าหลัก</a>
+    <a href="/notifications">การแจ้งเตือน</a>
+  </nav>
+  <div class="avatar" id="profileAvatar" aria-label="profile"></div>
+</header>
   
 
   <!-- Hero Section -->
@@ -56,60 +56,59 @@
 
 
   <!-- Activity Section -->
-  <section class="activities" id="activities-section">
-    <h2 id="activities-title">กิจกรรมทั้งหมด</h2>
-    <div class="grid" id="activities-grid">
+<section class="activities" id="activities-section">
+  <h2 id="activities-title">กิจกรรมทั้งหมด</h2>
+  <div class="grid" id="activities-grid">
+    <% if (user && user.role === 'admin') { %>
       <div class="card add-card" onclick="location.href='/add-event'">
         <div class="plus">+</div>
         <p>เพิ่มกิจกรรม</p>
       </div>
-      <div class="card" onclick="location.href='/events/7'">
-        <img src="https://image-activity.s3.us-east-1.amazonaws.com/ITcamp/itc1.jpeg" alt="">
-        <p>ITCamp21</p>
-      </div>
-      <div class="card" onclick="location.href='/events/8'">
-        <img src="https://image-activity.s3.us-east-1.amazonaws.com/TobeIT/tb1.jpg" alt="">
-        <p>TobeIT66</p>
-      </div>
-      <div class="card" onclick="location.href='/events/9'">
-        <img src="https://image-activity.s3.us-east-1.amazonaws.com/Unite/u1.jpg" alt="">
-        <p>UniteCamp7</p>
-      </div>
-      <div class="card" onclick="location.href='/events/10'">
-        <img src="https://image-activity.s3.us-east-1.amazonaws.com/IT3K/3k1.jpg" alt="">
-        <p>IT3K</p>
-      </div>
-      <div class="card" onclick="location.href='/events/11'">
-        <img src="https://image-activity.s3.us-east-1.amazonaws.com/prepro/p1.jpg" alt="">
-        <p>Pre-programming</p>
-      </div>
-    </div>
-  </section>
+    <% } %>
+  </div>
+</section>
 
-  <!-- Camps Display Section -->
-  <div id="camp-content" class="camp-grid"></div>
+<script>
+  // inject user เพื่อให้ฝั่ง client เช็คได้ (ถ้าจำเป็น)
+  window.__USER__ = <%- JSON.stringify(user || null).replace(/</g,'\\u003c') %>;
 
-  <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // ถ้ามี token แสดงว่า login แล้ว ให้ซ่อนปุ่ม
-    if (localStorage.getItem('token')) {
-      const loginBtn = document.getElementById('loginBtn');
-      const registerBtn = document.getElementById('registerBtn');
-      if (loginBtn) loginBtn.style.display = 'none';
-      if (registerBtn) registerBtn.style.display = 'none';
-    }
-  });
+  // โหลดกิจกรรมจาก API แล้ววางลง grid
+  (async function () {
+    const grid = document.getElementById('activities-grid');
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const avatar = document.getElementById('profileAvatar');
-    if (avatar) {
-      avatar.style.cursor = 'pointer';
-      avatar.addEventListener('click', () => {
-        window.location.href = '/profile';
+    async function load(q='') {
+      const url = new URL('/api/events', location.origin);
+      url.searchParams.set('is_published','true');
+      if (q) url.searchParams.set('q', q);
+
+      const res = await fetch(url);
+      const payload = await res.json();
+      const rows = Array.isArray(payload) ? payload : (payload.items || []);
+
+      const addCard = grid.querySelector('.add-card'); // เก็บ add-card ไว้ (ถ้ามี)
+      grid.innerHTML = '';
+      if (addCard) grid.appendChild(addCard);
+
+      rows.forEach(ev => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.onclick = () => location.href = `/events/${ev.id}`;
+        card.innerHTML = `
+          <img src="${ev.image_url || 'https://placehold.co/600x350'}" alt="">
+          <p>${ev.title || 'Untitled'}</p>
+        `;
+        grid.appendChild(card);
       });
     }
+
+    load();
+  })();
+
+  // avatar → profile
+  document.getElementById('profileAvatar')?.addEventListener('click', () => {
+    location.href = '/profile';
   });
-  
+</script>  
   </script>
 </body>
 </html>

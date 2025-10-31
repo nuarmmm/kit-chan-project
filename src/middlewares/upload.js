@@ -14,16 +14,18 @@ const storage = multerS3({
     const d = new Date();
     const y = d.getUTCFullYear();
     const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const safe = file.originalname.replace(/\s+/g, '-');
+    const safe = String(file.originalname || 'file').replace(/\s+/g, '-');
     cb(null, `uploads/events/${y}/${m}/${Date.now()}-${safe}`);
   }
 });
 
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
-exports.uploadCoverAndGallery = upload.fields([
-  { name: 'cover', maxCount: 1 },
+// ✓ ประกาศตัวแปรก่อน
+const uploadCoverAndGallery = upload.fields([
+  { name: 'cover',  maxCount: 1  },
   { name: 'images', maxCount: 12 }
 ]);
 
-module.exports = { uploadCoverAndGallery }; 
+
+module.exports = { uploadCoverAndGallery };

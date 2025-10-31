@@ -2,9 +2,8 @@
 const express = require('express');
 const router = express.Router();
 
-const { register, login, me } = require('../controllers/auth.controller');
-const auth = require('../middlewares/auth.middleware');
-
+const ctrl = require('../controllers/auth.controller');
+const { requireAuth } = require('../middlewares/auth.middleware');
 /**
  * @swagger
  * tags:
@@ -48,8 +47,7 @@ const auth = require('../middlewares/auth.middleware');
  *       '409':
  *         description: Email exists
  */
-router.post('/register', register);
-
+router.post('/register', ctrl.register);
 /**
  * @swagger
  * /auth/login:
@@ -76,7 +74,7 @@ router.post('/register', register);
  *       '401':
  *         description: Invalid credentials
  */
-router.post('/login', login);
+router.post('/login', ctrl.login);
 
 /**
  * @swagger
@@ -92,6 +90,6 @@ router.post('/login', login);
  *       '401':
  *         description: Unauthorized
  */
-router.get('/me', auth, me);
+router.get('/me', requireAuth, ctrl.me);
 
 module.exports = router;

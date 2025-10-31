@@ -105,67 +105,84 @@
     </form>
   </main>
 
-  <script>
-      const f = document.getElementById('eventForm');
-      const cover = document.getElementById('cover');
-      const drop = document.getElementById('coverDrop');
-      const prev = document.getElementById('coverPreview');
-      const ph = document.getElementById('coverPlaceholder');
-      const imgs = document.getElementById('images');
-      const thumbs = document.getElementById('galleryPreview');
-      const msg = document.getElementById('formMsg');
-      const btn = document.getElementById('submitBtn');
+<script>
+  const f = document.getElementById('eventForm');
+  const cover = document.getElementById('cover');
+  const drop = document.getElementById('coverDrop');
+  const prev = document.getElementById('coverPreview');
+  const ph = document.getElementById('coverPlaceholder');
+  const imgs = document.getElementById('images');
+  const thumbs = document.getElementById('galleryPreview');
+  const msg = document.getElementById('formMsg');
+  const btn = document.getElementById('submitBtn');
 
-      // พรีวิวรูปปก
-      drop.addEventListener('click', () => cover.click());
-      cover.addEventListener('change', () => {
-        if (cover.files && cover.files[0]) {
-          prev.src = URL.createObjectURL(cover.files[0]);
-          prev.onload = () => URL.revokeObjectURL(prev.src);
-          prev.classList.remove('hidden'); ph.style.display = 'none';
-        }
+  // พรีวิวรูปปก
+  drop.addEventListener('click', () => cover.click());
+  cover.addEventListener('change', () => {
+    if (cover.files && cover.files[0]) {
+      prev.src = URL.createObjectURL(cover.files[0]);
+      prev.onload = () => URL.revokeObjectURL(prev.src);
+      prev.classList.remove('hidden'); ph.style.display = 'none';
+    }
+  });
+
+  // พรีวิวแกลเลอรี
+  imgs?.addEventListener('change', () => {
+    thumbs.innerHTML = '';
+    [...imgs.files].forEach(file => {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.onload = () => URL.revokeObjectURL(img.src);
+      thumbs.appendChild(img);
+    });
+  });
+
+  // helper แปลง datetime-local → ISO
+  const toISO = v => v ? new Date(v).toISOString() : '';
+
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = '';
+    btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+
+    try {
+      const fd = new FormData(f);
+
+      // ฟิลด์เวลา: ถ้าว่างให้ลบออก ไม่ส่งค่าสตริงว่าง (กัน 400)
+      ['start_at', 'end_at', 'reg_open_at', 'reg_close_at'].forEach(k => {
+        const el = f.querySelector(`[name="${k}"]`);
+        if (!el) return;
+        if (el.value) fd.set(k, toISO(el.value));
+        else fd.delete(k);
       });
 
-      // พรีวิวแกลเลอรี
-      imgs?.addEventListener('change', () => {
-        thumbs.innerHTML = '';
-        [...imgs.files].forEach(file => {
-          const img = document.createElement('img');
-          img.src = URL.createObjectURL(file);
-          img.onload = () => URL.revokeObjectURL(img.src);
-          thumbs.appendChild(img);
-        });
+      // is_published ให้เป็น string 'true'/'false'
+      const pub = f.querySelector('[name="is_published"]');
+      fd.set('is_published', pub && pub.checked ? 'true' : 'false');
+
+      // ส่งไปยัง route จริง + แนบ Bearer token (อย่าใส่ Content-Type เองเพราะใช้ FormData)
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/events', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: fd
       });
 
-      // helper แปลง datetime-local → ISO
-      function toISO(v) { return v ? new Date(v).toISOString() : ''; }
+      if (!res.ok) {
+        let detail = '';
+        try { detail = (await res.json()).message || ''; } catch {}
+        throw new Error(`สร้างกิจกรรมไม่สำเร็จ (${res.status}) ${detail}`);
+      }
 
-      f.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        msg.textContent = ''; btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
-
-        try {
-          const fd = new FormData(f);
-          // แก้ชื่อฟิลด์เวลาให้เป็น ISO (ตามสคีมาใน Swagger/DB)
-          ['start_at', 'end_at', 'reg_open_at', 'reg_close_at'].forEach(k => {
-            const el = f.querySelector(`[name="${k}"]`);
-            if (el) { fd.set(k, toISO(el.value)); }
-          });
-          // เช็กบูลีน
-          if (!fd.get('is_published')) fd.set('is_published', 'false');
-
-          const res = await fetch('/api/admin/events', { method: 'POST', body: fd });
-          if (!res.ok) throw new Error('สร้างกิจกรรมไม่สำเร็จ');
-          // เสร็จ → กลับหน้าแรก (ผู้ใช้จะเห็นเพราะ is_published=true)
-          location.href = '/';
-        } catch (err) {
-          msg.textContent = err.message || 'เกิดข้อผิดพลาด';
-        } finally {
-          btn.disabled = false; btn.textContent = 'เพิ่ม';
-        }
-      });
-
-  </script>
+      // เสร็จ → กลับหน้าแรก (ผู้ใช้จะเห็นถ้า is_published=true)
+      location.href = '/';
+    } catch (err) {
+      msg.textContent = err.message || 'เกิดข้อผิดพลาด';
+    } finally {
+      btn.disabled = false; btn.textContent = 'เพิ่ม';
+    }
+  });
+</script>
 </body>
 
 </html>
