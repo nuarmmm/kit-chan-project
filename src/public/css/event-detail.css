@@ -122,7 +122,9 @@ body {
 .actions {
     display: flex;
     justify-content: center;
-    margin-top: 18px
+    gap: 16px;           /* add spacing between action buttons */
+    margin-top: 18px;
+    flex-wrap: wrap;     /* allow wrapping on small screens */
 }
 
 .btn {
@@ -132,7 +134,10 @@ body {
     text-decoration: none;
     padding: 12px 28px;
     border-radius: 999px;
-    box-shadow: 0 4px 14px rgba(76, 93, 135, .18)
+    box-shadow: 0 4px 14px rgba(76, 93, 135, .18);
+    border: none;            /* make button element look like link-styled button */
+    cursor: pointer;         /* consistent pointer for both <a> and <button> */
+    font: inherit;           /* keep site font */
 }
 
 .btn:hover {

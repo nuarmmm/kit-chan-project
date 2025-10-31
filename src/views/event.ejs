@@ -15,7 +15,6 @@
     <div class="topbar__inner">
       <nav class="links">
         <a href="/">หน้าหลัก</a>
-        <a href="#">การแจ้งเตือน</a>
       </nav>
       <div class="avatar" id="profileAvatar" aria-label="profile"></div>
     </div>
@@ -23,7 +22,21 @@
   </header>
 
   <main class="container">
-    <h1 class="title"><%= activity.title %></h1>
+    <style>
+      /* Inline edit helpers - scoped to this page */
+      .view-only { display: inline; }
+      .edit-only { display: none !important; }
+      .is-editing .view-only { display: none !important; }
+      .is-editing .edit-only { display: inline-block !important; }
+      .field-input { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 10px; font: inherit; background: #fff; box-sizing: border-box; }
+      .row-edit { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .is-editing .row-edit { display: grid; }
+      .btn.secondary { background: #eef2ff; color: #374151; }
+    </style>
+    <h1 class="title">
+      <span class="view-only" id="titleView"><%= activity.title %></span>
+      <input class="edit-only field-input" id="titleEdit" type="text" value="<%= activity.title %>">
+    </h1>
 
     <!-- แกลเลอรีแบบเรียบๆ -->
     <section class="gallery">
@@ -38,11 +51,12 @@
 
     <section class="detail">
       <h2 class="sub">รายละเอียดกิจกรรม</h2>
-      <p class="desc"><%= activity.description %></p>
+      <p class="desc view-only" id="descView"><%= activity.description %></p>
+      <textarea class="edit-only field-input" id="descEdit" rows="5"><%= activity.description || '' %></textarea>
       <div class="info-grid">
         <div class="info">
           <h3>วันที่จัดกิจกรรม</h3>
-          <p>
+          <p class="view-only" id="eventDatesView">
             <% function formatDate(dateStr) {
               if (!dateStr) return '';
               const d = new Date(dateStr);
@@ -50,21 +64,32 @@
             } %>
             <%= formatDate(activity.start_at) %> – <%= formatDate(activity.end_at) %>
           </p>
+          <div class="edit-only row-edit">
+            <input id="startAtEdit" type="date" class="edit-only field-input" />
+            <input id="endAtEdit" type="date" class="edit-only field-input" />
+          </div>
         </div>
         <div class="info">
           <h3>วันรับสมัคร</h3>
-          <p><%= formatDate(activity.reg_open_at) %> – <%= formatDate(activity.reg_close_at) %></p>
+          <p class="view-only" id="regDatesView"><%= formatDate(activity.reg_open_at) %> – <%= formatDate(activity.reg_close_at) %></p>
+          <div class="edit-only row-edit">
+            <input id="regOpenEdit" type="date" class="edit-only field-input" />
+            <input id="regCloseEdit" type="date" class="edit-only field-input" />
+          </div>
         </div>
         <div class="info">
           <h3>สถานที่จัดกิจกรรม</h3>
-          <p><%= activity.location %></p>
+          <p class="view-only" id="locationView"><%= activity.location %></p>
+          <input class="edit-only field-input" id="locationEdit" type="text" value="<%= activity.location || '' %>" />
         </div>
       </div>
 
       <div class="actions">
         <a class="btn" href="/events/<%= activity.id %>/staff-apply" id="applyBtn">สมัคร</a>
-        <a class="btn" href="/events/<%= activity.id %>/staff-apply" style="display: none;" id="editBtn">แก้ไขข้อมูล</a>
-        <a class="btn" href="/events/<%= activity.id %>/staff-apply" style="display: none;" id="applicantsBtn">รายชื่อผู้สมัคร</a>
+        <button class="btn" type="button" style="display: none;" id="editBtn">แก้ไขข้อมูล</button>
+        <a class="btn" href="/admin/events/<%= activity.id %>/applicants" style="display: none;" id="applicantsBtn">รายชื่อผู้สมัคร</a>
+        <button class="btn" type="button" id="saveBtn" style="display:none;">บันทึก</button>
+        <button class="btn secondary" type="button" id="cancelBtn" style="display:none;">ยกเลิก</button>
       </div>
     </section>
   </main>
@@ -84,6 +109,8 @@
 
     module.exports = router;
   </script> -->
+  <!-- Embed activity JSON for client-side editing without inline EJS in script -->
+  <script id="activity-data" type="application/json"><%- JSON.stringify(activity || {}) %></script>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     console.log(JSON.parse(localStorage.getItem('user')));
@@ -96,6 +123,109 @@
       document.getElementById('applicantsBtn').style.display = 'none';
       document.getElementById('applyBtn').style.display = 'inline-block';
     }
+
+    // hydrate edit inputs initial values
+  const a = JSON.parse(document.getElementById('activity-data')?.textContent || '{}');
+    function toDateInputValue(iso) {
+      if (!iso) return '';
+      if (typeof iso === 'string') {
+        // If it's already a pure date, return as-is
+        if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+        // If it's ISO with time (e.g., 2025-11-14T17:00:00.000Z), use local time to avoid off-by-one
+        if (/^\d{4}-\d{2}-\d{2}T/.test(iso)) {
+          const d = new Date(iso);
+          if (!Number.isNaN(d.getTime())) {
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+          }
+        }
+      }
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '';
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    document.getElementById('startAtEdit').value = toDateInputValue(a.start_at);
+    document.getElementById('endAtEdit').value = toDateInputValue(a.end_at);
+    document.getElementById('regOpenEdit').value = toDateInputValue(a.reg_open_at);
+    document.getElementById('regCloseEdit').value = toDateInputValue(a.reg_close_at);
+
+    // Edit mode handlers - only active after clicking "แก้ไขข้อมูล"
+    const bodyEl = document.body;
+    const editBtn = document.getElementById('editBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const applicantsBtn = document.getElementById('applicantsBtn');
+  const applyBtn = document.getElementById('applyBtn');
+
+    function setEditing(on) {
+      bodyEl.classList.toggle('is-editing', !!on);
+      if (saveBtn) saveBtn.style.display = on ? 'inline-block' : 'none';
+      if (cancelBtn) cancelBtn.style.display = on ? 'inline-block' : 'none';
+      // While editing, hide Edit and Applicants buttons; show them back when not editing
+      if (editBtn) editBtn.style.display = on ? 'none' : 'inline-block';
+      if (applicantsBtn) applicantsBtn.style.display = on ? 'none' : 'inline-block';
+      // applyBtn remains hidden for admin; do not toggle here
+    }
+
+    function resetEdits() {
+      document.getElementById('titleEdit').value = a.title || '';
+      document.getElementById('descEdit').value = a.description || '';
+      document.getElementById('startAtEdit').value = toDateInputValue(a.start_at);
+      document.getElementById('endAtEdit').value = toDateInputValue(a.end_at);
+      document.getElementById('regOpenEdit').value = toDateInputValue(a.reg_open_at);
+      document.getElementById('regCloseEdit').value = toDateInputValue(a.reg_close_at);
+      document.getElementById('locationEdit').value = a.location || '';
+    }
+
+  editBtn.addEventListener('click', (e) => { e.preventDefault(); resetEdits(); setEditing(true); });
+    cancelBtn.addEventListener('click', (e) => { e.preventDefault(); resetEdits(); setEditing(false); });
+
+    function toISOAtNoon(dateStr) {
+      if (!dateStr) return null;
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toISOString();
+    }
+    function formatThaiDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    saveBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+  const id = Number(a.id);
+      const payload = {
+        title: document.getElementById('titleEdit').value.trim() || null,
+        description: document.getElementById('descEdit').value.trim() || null,
+        start_at: toISOAtNoon(document.getElementById('startAtEdit').value) || null,
+        end_at: toISOAtNoon(document.getElementById('endAtEdit').value) || null,
+        reg_open_at: toISOAtNoon(document.getElementById('regOpenEdit').value) || null,
+        reg_close_at: toISOAtNoon(document.getElementById('regCloseEdit').value) || null,
+        location: document.getElementById('locationEdit').value.trim() || null,
+      };
+      try {
+        const res = await fetch(`/api/events/${id}` , { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.message || `อัปเดตไม่สำเร็จ (${res.status})`);
+        // update view values
+        document.getElementById('titleView').textContent = data.title || payload.title || '—';
+        document.getElementById('descView').textContent = data.description || payload.description || '—';
+        document.getElementById('locationView').textContent = data.location || payload.location || '—';
+        const s = data.start_at || payload.start_at; const e2 = data.end_at || payload.end_at;
+        const ro = data.reg_open_at || payload.reg_open_at; const rc = data.reg_close_at || payload.reg_close_at;
+        document.getElementById('eventDatesView').textContent = `${formatThaiDate(s)}${e2 ? ' – ' + formatThaiDate(e2) : ''}`.trim() || '—';
+        document.getElementById('regDatesView').textContent = `${formatThaiDate(ro)}${rc ? ' – ' + formatThaiDate(rc) : ''}`.trim() || '—';
+        setEditing(false);
+        alert('บันทึกข้อมูลแล้ว');
+      } catch (err) {
+        alert(err.message || 'เกิดข้อผิดพลาด');
+      }
+    });
   });
   </script>
 </body>
