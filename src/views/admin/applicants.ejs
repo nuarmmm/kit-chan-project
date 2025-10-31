@@ -17,8 +17,10 @@
     <header class="topbar">
         <div class="topbar__links">
             <a href="/admin/events" class="topbar__link">หน้ากิจกรรม</a>
-            <a href="/notifications" class="topbar__link">การแจ้งเตือน</a>
-            <img src="/img/avatar.jpg" alt="Admin" class="topbar__avatar" />
+                        <img
+                            class="topbar__avatar"
+                            alt="Admin"
+                            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239aa3af'><circle cx='12' cy='8' r='4'/><rect x='5' y='14' width='14' height='6' rx='3'/></svg>"/>
         </div>
     </header>
 
@@ -34,7 +36,10 @@
 
             <template id="applicantRowTpl">
                 <li class="applicant-item">
-                    <img class="avatar" src="/img/default-avatar.png" alt="">
+                    <img
+                      class="avatar"
+                      alt=""
+                      src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239aa3af'><circle cx='12' cy='8' r='4'/><rect x='5' y='14' width='14' height='6' rx='3'/></svg>"/>
                     <span class="name"></span>
                     <button class="btn btn-view" type="button">ดูข้อมูลผู้สมัคร</button>
                 </li>
@@ -82,7 +87,9 @@
                     const node = tpl.content.firstElementChild.cloneNode(true);
                     const name = a.full_name || [a.first_name, a.last_name].filter(Boolean).join(' ') || 'ไม่ระบุชื่อ';
                     node.querySelector('.name').textContent = name;
-                    node.querySelector('.avatar').alt = name;
+                    const avatarEl = node.querySelector('.avatar');
+                    avatarEl.alt = name;
+                    if (a.avatar_url) avatarEl.src = a.avatar_url;
                     node.querySelector('.btn-view').addEventListener('click', () => {
                         location.href = `/admin/events/${encodeURIComponent(eventId)}/applicants/${encodeURIComponent(a.id)}`;
                     });
